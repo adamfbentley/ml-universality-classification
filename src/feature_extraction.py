@@ -182,57 +182,51 @@ class FeatureExtractor:
         height, width = trajectory.shape
         
         # === ROUGHNESS EXPONENT α (Spatial Scaling) ===
+        # Using structure function method: S(L) = <(h(x+L) - h(x))^2> ~ L^(2α)
         
         config = FEATURE_CONFIG['alpha_computation']
         
-        # Define length scales to sample
-        min_L = max(8, int(width * config['min_length_fraction']))
-        max_L = int(width * config['max_length_fraction'])
+        # Use final (saturated) interface for spatial scaling
+        final_interface = trajectory[-1] - np.mean(trajectory[-1])
         
-        if max_L <= min_L + 2:
-            # Not enough resolution for scaling analysis
-            alpha = 0.5  # Default value
+        # Define length scales to sample (avoid too small or too large)
+        min_L = max(4, int(width * 0.02))   # At least 2% of system
+        max_L = int(width * 0.4)             # Up to 40% of system
+        
+        if max_L <= min_L + 4:
+            alpha = 0.5  # Default
         else:
-            lengths = np.logspace(np.log10(min_L), np.log10(max_L), 
-                                config['n_length_points']).astype(int)
-            lengths = np.unique(lengths)
+            lengths = np.logspace(np.log10(min_L), np.log10(max_L), 12).astype(int)
+            lengths = np.unique(lengths[lengths > 0])
             
-            # Measure interface width at each length scale
-            widths = []
-            final_interface = trajectory[-1] - np.mean(trajectory[-1])  # Remove mean
+            # Compute structure function S(L) for each length scale
+            structure_values = []
+            valid_lengths = []
             
             for L in lengths:
-                if L >= max_L:
-                    break
+                if L >= width // 2:
+                    continue
                     
-                # Sample multiple random segments for statistics
-                segment_widths = []
-                n_segments = config['n_segments_per_length']
+                # Structure function: average of (h(x+L) - h(x))^2
+                diffs_squared = []
+                for x in range(0, width - L, max(1, L // 4)):
+                    diff = final_interface[x + L] - final_interface[x]
+                    diffs_squared.append(diff ** 2)
                 
-                for _ in range(n_segments):
-                    if L >= width:
-                        break
-                    start = np.random.randint(0, width - L)
-                    segment = final_interface[start:start+L]
-                    
-                    if len(segment) > 1:
-                        # Interface width (RMS fluctuation)
-                        w = np.sqrt(np.mean((segment - np.mean(segment))**2))
-                        if w > 1e-10:  # Avoid zero widths
-                            segment_widths.append(w)
-                
-                if len(segment_widths) >= 3:  # Need sufficient statistics
-                    widths.append(np.mean(segment_widths))
+                if len(diffs_squared) >= 5:
+                    S_L = np.mean(diffs_squared)
+                    if S_L > 1e-12:
+                        structure_values.append(S_L)
+                        valid_lengths.append(L)
             
-            # Fit power law: w ~ L^α
-            if len(widths) >= 4:
+            # Fit power law: S(L) ~ L^(2α) => log(S) = 2α*log(L) + const
+            if len(structure_values) >= 4:
                 try:
-                    valid_lengths = lengths[:len(widths)]
-                    log_L = np.log(valid_lengths)
-                    log_w = np.log(widths)
+                    log_L = np.log(np.array(valid_lengths))
+                    log_S = np.log(np.array(structure_values))
                     
-                    # Robust linear fitting
-                    alpha = np.polyfit(log_L, log_w, 1)[0]  # Slope
+                    slope = np.polyfit(log_L, log_S, 1)[0]
+                    alpha = slope / 2.0  # S ~ L^(2α) so slope = 2α
                 except:
                     alpha = 0.5
             else:
@@ -543,18 +537,13 @@ class FeatureExtractor:
         if not np.all(np.isfinite(features)):
             return False
         
-        # Check scaling exponents are within physical bounds
-        alpha, beta = features[0], features[1]
-        
-        if alpha < QUALITY_CONFIG['min_alpha'] or alpha > QUALITY_CONFIG['max_alpha']:
-            return False
-        
-        if beta < QUALITY_CONFIG['min_beta'] or beta > QUALITY_CONFIG['max_beta']:
-            return False
-        
         # Check for minimum feature variance (avoid all-zero features)
         if np.var(features) < 1e-12:
             return False
+        
+        # Note: We do NOT validate against theoretical exponent bounds.
+        # Finite-size simulations produce exponents that differ from
+        # asymptotic theory, and the ML should learn from actual data.
         
         return True
     

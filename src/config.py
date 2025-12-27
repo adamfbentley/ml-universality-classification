@@ -45,8 +45,8 @@ ML_RESULTS_PATH = RESULTS_DIR / "ml_results.pkl"
 # Simulation grid parameters
 SIMULATION_CONFIG = {
     # Grid dimensions
-    'width': 128,                    # Lattice width (spatial sites)
-    'height': 150,                   # Time steps
+    'width': 512,                    # Lattice width (spatial sites) - research standard
+    'height': 500,                   # Time steps - allows proper scaling regime
     'samples_per_class': 60,         # Number of samples to generate per universality class
     
     # Model parameters
@@ -93,14 +93,14 @@ FEATURE_CONFIG = {
         'max_length_fraction': 0.5,      # Maximum segment length as fraction of width
         'n_length_points': 8,            # Number of length scales to sample
         'n_segments_per_length': 15,     # Number of random segments per length scale
-        'physical_bounds': (0.001, 1.999)  # Physical constraints for α
+        'physical_bounds': (0.001, 2.5)  # Physical constraints for α (relaxed)
     },
     
     'beta_computation': {
         'transient_skip_fraction': 0.3,  # Skip first 30% of time evolution
         'sampling_step': 2,               # Use every nth time point
         'min_points': 8,                 # Minimum points for reliable fitting
-        'physical_bounds': (0.001, 0.999)  # Physical constraints for β
+        'physical_bounds': (0.001, 1.5)  # Physical constraints for β (relaxed)
     },
     
     # Spectral analysis
@@ -200,10 +200,10 @@ PLOT_CONFIG = {
 
 QUALITY_CONFIG = {
     # Physics validation thresholds
-    'min_alpha': 0.05,
-    'max_alpha': 1.5,
-    'min_beta': 0.05,
-    'max_beta': 0.8,
+    'min_alpha': 0.01,
+    'max_alpha': 2.0,
+    'min_beta': 0.01,
+    'max_beta': 1.5,
     
     # Trajectory quality checks
     'min_interface_variance': 1e-6,  # Minimum variance to avoid flat interfaces

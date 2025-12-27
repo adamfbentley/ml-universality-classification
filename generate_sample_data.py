@@ -12,9 +12,10 @@ import sys
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent / 'src'))
 
-from src.physics_simulation import GrowthSimulator
-from src.feature_extraction import FeatureExtractor
+from physics_simulation import GrowthModelSimulator
+from feature_extraction import FeatureExtractor
 
 
 def generate_sample_dataset(samples_per_class=10, width=64, steps=100):
@@ -40,11 +41,11 @@ def generate_sample_dataset(samples_per_class=10, width=64, steps=100):
     print(f"   • Lattice width: {width}")
     print(f"   • Time steps: {steps}")
     
-    simulator = GrowthSimulator(width=width, random_state=42)
+    simulator = GrowthModelSimulator(width=width, height=steps, random_state=42)
     extractor = FeatureExtractor()
     
-    models = ['ballistic_deposition', 'edwards_wilkinson', 'kpz']
-    model_labels = {'ballistic_deposition': 0, 'edwards_wilkinson': 1, 'kpz': 2}
+    models = ['ballistic_deposition', 'edwards_wilkinson', 'kpz_equation']
+    model_labels = {'ballistic_deposition': 0, 'edwards_wilkinson': 1, 'kpz_equation': 2}
     
     all_features = []
     all_labels = []
@@ -55,12 +56,7 @@ def generate_sample_dataset(samples_per_class=10, width=64, steps=100):
         
         for i in range(samples_per_class):
             # Simulate trajectory
-            if model_name == 'ballistic_deposition':
-                trajectory = simulator.simulate_ballistic_deposition(steps=steps)
-            elif model_name == 'edwards_wilkinson':
-                trajectory = simulator.simulate_edwards_wilkinson(steps=steps)
-            else:  # kpz
-                trajectory = simulator.simulate_kpz(steps=steps)
+            trajectory = simulator.generate_trajectory(model_name)
             
             # Extract features
             features = extractor.extract_features(trajectory)

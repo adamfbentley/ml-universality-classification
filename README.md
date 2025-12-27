@@ -79,13 +79,15 @@ ml-universality-classification/
 
 ## Results
 
-The classifiers achieve strong performance in distinguishing between the three universality classes:
+The implementation provides a complete ML pipeline for classifying surface growth universality classes. The code includes:
 
-- **Random Forest**: ~92-95% accuracy with cross-validation
-- **SVM (RBF kernel)**: ~88-91% accuracy
-- **Key discriminative features**: Growth exponent (β), roughness exponent (α), dynamic exponent (z)
+- **Multiple classifiers**: Random Forest, SVM (RBF kernel), ensemble methods
+- **Comprehensive evaluation**: Cross-validation, confusion matrices, feature importance analysis
+- **Reproducible experiments**: Configuration management ensures consistent results
 
-Feature importance analysis shows that scaling exponents dominate classification, with morphological features (roughness, correlation length) providing additional discriminative power. All results are reproducible using the provided configuration system.
+Based on the code implementation, the pipeline is designed to identify discriminative features including growth exponent (β), roughness exponent (α), dynamic exponent (z), and morphological properties. Actual performance will vary based on simulation parameters (grid size, time steps, sample count) defined in the configuration.
+
+**Note**: Visualizations in `results/plots/` show example outputs from the analysis pipeline.
 
 ## Implementation Notes
 

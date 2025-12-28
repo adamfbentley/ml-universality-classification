@@ -1,18 +1,42 @@
 # ML Universality Classification
 
-Machine learning classification of surface growth universality classes (Edwards-Wilkinson vs KPZ) using morphological features.
+Machine learning classification of surface growth universality classes using morphological features that remain discriminative at finite system sizes where traditional scaling exponents fail.
 
-## The Scientific Question
+## Motivation
 
-Traditional universality classification relies on scaling exponents (α, β), which require large system sizes and long times to converge to theoretical values. **Can morphological features classify universality at finite system sizes where scaling exponents are unreliable?**
+Surface growth universality is traditionally identified through scaling exponents (α, β) measured from interface width evolution: W(L,t) ~ L^α f(t/L^z). However, these exponents only converge to theoretical values in the asymptotic limit (L→∞, t→∞). Real experiments and simulations operate at finite sizes where:
 
-This project investigates whether local surface statistics provide robust classification when asymptotic scaling analysis fails.
+- Exponent measurements have large systematic errors
+- Crossover effects contaminate scaling behavior  
+- Classification based on exponents becomes unreliable
 
-## Key Results
+**This project asks**: Can local morphological features—gradient statistics, height distributions, temporal correlations—classify universality classes robustly at system sizes where scaling analysis fails?
 
-### Classification Accuracy by Method
+## Key Finding
 
-*Results from 5-fold cross-validation, 80 samples per class per system size, averaged over 5 trials:*
+**Yes.** Morphological features achieve >90% classification accuracy at L=32, where scaling exponents perform no better than random chance (50%). This suggests that universality class information is encoded in local surface structure, not just asymptotic scaling behavior.
+
+## Experimental Design
+
+We conducted a systematic study comparing classification methods:
+
+### Study 1: Exponents vs Full Features
+Direct comparison across system sizes L = 32, 64, 128, 256, 512
+
+### Study 2: Feature Ablation
+Which feature groups contribute most? (scaling, spectral, morphological, gradient, temporal, correlation)
+
+### Study 3: Complete Method Comparison
+Head-to-head: exponents-only vs gradient-only vs morphological-only vs full 16 features
+
+### Study 4: Robustness Testing
+Noise amplitude variation (0.1-5.0), crossover regime (EW→KPZ transition)
+
+## Results
+
+### Classification Accuracy
+
+*5-fold cross-validation, 80 samples per class, averaged over 5 independent trials:*
 
 | System Size | Exponents Only | Gradient Only | Morphological | Full Features |
 |-------------|----------------|---------------|---------------|---------------|
@@ -22,11 +46,11 @@ This project investigates whether local surface statistics provide robust classi
 | L=256 | 52.5% ± 3.4% | 98.3% ± 1.1% | 99.2% ± 1.0% | 99.6% ± 0.3% |
 | L=512 | 54.6% ± 1.7% | 98.3% ± 0.7% | 99.5% ± 0.3% | 100% ± 0.0% |
 
-**Key observation**: Exponents alone perform near random chance (50%) at all tested system sizes, while morphological features achieve >90% accuracy even at L=32.
+**Critical observation**: Exponents never exceed ~55% at any tested size—essentially random chance for a 2-class problem.
 
-### Scaling Exponent Errors
+### Why Exponents Fail
 
-At finite L, measured exponents deviate significantly from theoretical values (α=0.5, β=0.25 for EW; α=0.5, β=1/3 for KPZ in 1+1D):
+Measured exponent errors relative to theoretical values (EW: α=0.5, β=0.25; KPZ: α=0.5, β=1/3):
 
 | System Size | α error | β error |
 |-------------|---------|---------|
@@ -34,11 +58,11 @@ At finite L, measured exponents deviate significantly from theoretical values (�
 | L=128 | 65% | 56% |
 | L=512 | 92% | 41% |
 
-These large errors explain why exponent-based classification fails.
+At finite L, exponents are too noisy to distinguish classes that share α=0.5 and differ only in β by ~0.08.
 
-### Feature Group Importance (RandomForest)
+### Feature Importance
 
-Feature importance varies with system size:
+RandomForest feature group importance (varies with system size):
 
 | Group | L=32 | L=128 | L=512 |
 |-------|------|-------|-------|
@@ -48,45 +72,33 @@ Feature importance varies with system size:
 | spectral | 3% | 3% | 18% |
 | scaling (α, β) | <1% | <1% | 0% |
 
-*Note: Scaling exponents contribute essentially nothing to classification at any system size.*
+Scaling exponents contribute essentially nothing. The classifier relies on temporal dynamics and local surface statistics.
 
 ## Physical Interpretation
 
-The KPZ equation: `∂h/∂t = ν∇²h + (λ/2)(∇h)² + η`
+The KPZ equation differs from Edwards-Wilkinson by the nonlinear term:
 
-The nonlinear term `(λ/2)(∇h)²` distinguishes KPZ from Edwards-Wilkinson. The ML features that work (gradient statistics, temporal evolution, height distributions) capture differences in local surface structure that arise from this nonlinearity.
+**EW**: ∂h/∂t = ν∇²h + η  
+**KPZ**: ∂h/∂t = ν∇²h + **(λ/2)(∇h)²** + η
 
-**Why this works at finite L**: Scaling exponents describe asymptotic behavior (L→∞, t→∞), but local morphological statistics reflect the underlying dynamics immediately. The EW and KPZ equations produce surfaces with measurably different local properties regardless of whether the system has reached the scaling regime.
+This nonlinearity affects local surface structure immediately, not just asymptotic scaling. Features like gradient statistics, width evolution rates, and height distributions capture these dynamical differences at any system size.
+
+**Why this matters**: Scaling exponents measure how the system *eventually* behaves. Morphological features measure how it *actually* behaves right now. The latter remains informative when the former hasn't converged.
+
+## Context & Novelty
+
+ML for phase classification is well-established for equilibrium systems (Ising, Potts models) following Carrasquilla & Melko (2017). However, applications to **non-equilibrium surface growth** universality classes are sparse. Existing ML work on kinetic roughening (e.g., Makhoul et al. 2024) focuses on predicting exponent values, not classification.
+
+This project's contribution: demonstrating that morphological features enable robust classification at finite sizes where the traditional approach (scaling exponents) fails, with explicit quantitative comparison.
 
 ## Limitations
 
-- **Two classes only**: Only EW vs KPZ tested; more universality classes (MBE, VLDS) would strengthen the work
-- **Simulated data**: Real experimental validation not performed
-- **1+1D only**: Results are for 1D interfaces; 2+1D not tested
-- **Moderate sample sizes**: 80 samples per class may not capture full variance
-- **Single noise model**: Gaussian white noise only; colored noise not tested
-- **No hyperparameter tuning**: Default sklearn parameters used
-
-## Reproduction
-
-### Run the Scientific Study
-
-```bash
-cd src
-python scientific_study.py
-```
-
-Generates:
-- Exponents vs full features comparison
-- Feature ablation study
-- Complete method comparison
-- Results saved to `results/scientific_study_results.pkl`
-
-### Run the Main Experiment
-
-```bash
-python run_experiment.py
-```
+- **Two classes only**: EW vs KPZ; additional classes (MBE, VLDS) would strengthen generality
+- **Simulated data only**: No experimental validation
+- **(1+1)D only**: 1D interfaces; (2+1)D surfaces not tested
+- **Moderate sample sizes**: 80 per class per configuration
+- **Default hyperparameters**: No systematic tuning
+- **Single noise model**: Gaussian white noise only
 
 ## Usage
 
@@ -113,24 +125,30 @@ python run_experiment.py
 
 ```
 src/
-├── scientific_study.py      # Main experiments (exponents vs features)
-├── robustness_study.py      # System size, noise, crossover tests
-├── physics_simulation.py    # EW and KPZ surface growth (Numba JIT)
-├── feature_extraction.py    # 16 features (scaling, spectral, morphological, etc.)
-├── ml_training.py           # RF, SVM classifiers
-├── config.py                # Simulation parameters
-└── run_experiment.py        # Main pipeline
+├── scientific_study.py      # Core experiments: 4 systematic studies (~550 lines)
+├── robustness_study.py      # System size, noise, crossover analysis
+├── physics_simulation.py    # EW and KPZ surface growth (Numba-accelerated)
+├── feature_extraction.py    # 16 physics-informed features
+├── ml_training.py           # RandomForest, SVM classifiers
+├── config.py                # Simulation and model parameters
+└── run_experiment.py        # Full pipeline orchestration
+
+results/
+├── scientific_study_results.pkl    # All experimental data
+└── scientific_study.png            # Publication-quality figures
 ```
 
 ## Theoretical Background
 
-**Edwards-Wilkinson (1+1D)**: ∂h/∂t = ν∇²h + η  
-Exponents: α = 0.5, β = 0.25, z = 2.0
+**Edwards-Wilkinson (1+1D)**:  
+∂h/∂t = ν∇²h + η  
+Exponents: α = 1/2, β = 1/4, z = 2 (exact)
 
-**KPZ (1+1D)**: ∂h/∂t = ν∇²h + (λ/2)(∇h)² + η  
-Exponents: α = 0.5, β = 1/3, z = 3/2
+**Kardar-Parisi-Zhang (1+1D)**:  
+∂h/∂t = ν∇²h + (λ/2)(∇h)² + η  
+Exponents: α = 1/2, β = 1/3, z = 3/2 (exact)
 
-Both have the same roughness exponent α in 1+1D, making exponent-based classification particularly challenging.
+Note: Both classes share α = 1/2 in (1+1)D, making roughness exponent alone insufficient for classification.
 
 ## References
 
@@ -169,6 +187,14 @@ scipy
 numba
 ```
 
+## Future Directions
+
+- Additional universality classes (MBE, VLDS, directed percolation)
+- (2+1)D surface growth
+- Experimental data validation (AFM/STM thin film measurements)
+- Deep learning approaches (CNNs on raw surface images)
+- Crossover regime mapping
+
 ## Author
 
-A computational physics project exploring ML classification of non-equilibrium surface growth universality classes.
+A computational physics investigation into ML-based universality classification for non-equilibrium surface growth.

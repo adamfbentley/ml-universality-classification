@@ -86,10 +86,30 @@ src/
 
 ## References
 
-1. Kardar, Parisi, Zhang (1986) - Original KPZ equation
-2. Barabási & Stanley (1995) - Fractal Concepts in Surface Growth
-3. Carrasquilla & Melko (2017) - ML for phases of matter, Nature Physics
-4. Family & Vicsek (1985) - Scaling of growing surfaces
+### Surface Growth & Universality
+
+1. **Kardar, M., Parisi, G., & Zhang, Y. C.** (1986). Dynamic Scaling of Growing Interfaces. *Physical Review Letters*, 56(9), 889-892.  
+   Original KPZ equation defining the universality class.
+
+2. **Family, F., & Vicsek, T.** (1985). Scaling of the active zone in the Eden process on percolation networks and the ballistic deposition model. *Journal of Physics A: Mathematical and General*, 18(2), L75.  
+   Family-Vicsek scaling relation for surface growth.
+
+3. **Barabási, A. L., & Stanley, H. E.** (1995). *Fractal Concepts in Surface Growth*. Cambridge University Press.  
+   Comprehensive textbook on kinetic roughening and universality classes.
+
+4. **Cuerno, R., & Vázquez, L.** (2004). Universality issues in surface kinetic roughening of thin solid films. *arXiv:cond-mat/0402630*.  
+   Review of finite-size effects and crossover behavior in experimental systems.
+
+### Machine Learning for Physics
+
+5. **Carrasquilla, J., & Melko, R. G.** (2017). Machine learning phases of matter. *Nature Physics*, 13(5), 431-434.  
+   Pioneering work on ML classification of equilibrium phase transitions.
+
+6. **Wang, L.** (2016). Discovering Phase Transitions with Unsupervised Learning. *Physical Review B*, 94(19), 195105.  
+   Unsupervised learning methods for detecting critical points.
+
+7. **Makhoul, B. Y., Simas Filho, E. F., & de Assis, T. A.** (2024). Machine learning method for roughness prediction. *Surface Topography: Metrology and Properties*, 12(3), 035012.  
+   Recent work on ML for kinetic roughening, focused on time evolution prediction.
 
 ## Requirements
 

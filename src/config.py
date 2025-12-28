@@ -47,19 +47,14 @@ SIMULATION_CONFIG = {
     # Grid dimensions
     'width': 512,                    # Lattice width (spatial sites) - research standard
     'height': 500,                   # Time steps - allows proper scaling regime
-    'samples_per_class': 60,         # Number of samples to generate per universality class
+    'samples_per_class': 90,         # Number of samples to generate per universality class
     
-    # Model parameters
-    'ballistic_deposition': {
-        'noise_strength_range': (0.1, 0.3),
-        'description': 'KPZ Universality Class (Ballistic Growth)'
-    },
-    
+    # Model parameters - Two genuinely different universality classes
     'edwards_wilkinson': {
         'diffusion_range': (0.8, 1.2),
         'noise_strength_range': (0.8, 1.2),
         'dt': 0.1,
-        'description': 'Edwards-Wilkinson (Linear Growth)'
+        'description': 'Edwards-Wilkinson Universality Class (Linear Growth)'
     },
     
     'kpz_equation': {
@@ -67,20 +62,19 @@ SIMULATION_CONFIG = {
         'nonlinearity_range': (0.8, 1.2),
         'noise_strength_range': (0.8, 1.2),
         'dt': 0.05,
-        'description': 'KPZ Equation (Nonlinear Growth)'
+        'description': 'KPZ Universality Class (Nonlinear Growth)'
     }
 }
 
-# Theoretical scaling exponents for validation
+# Theoretical scaling exponents for validation (1D systems)
 THEORETICAL_EXPONENTS = {
-    'ballistic_deposition': {'alpha': 0.5, 'beta': 0.33, 'z': 1.5},
     'edwards_wilkinson': {'alpha': 0.5, 'beta': 0.25, 'z': 2.0},
     'kpz_equation': {'alpha': 0.5, 'beta': 0.33, 'z': 1.5}
 }
 
-# Class information
-CLASS_NAMES = ['KPZ (Ballistic)', 'Edwards-Wilkinson', 'KPZ (Equation)']
-MODEL_TYPES = ['ballistic_deposition', 'edwards_wilkinson', 'kpz_equation']
+# Class information - Two genuinely different universality classes
+CLASS_NAMES = ['Edwards-Wilkinson', 'KPZ']
+MODEL_TYPES = ['edwards_wilkinson', 'kpz_equation']
 
 # ============================================================================
 # FEATURE EXTRACTION PARAMETERS

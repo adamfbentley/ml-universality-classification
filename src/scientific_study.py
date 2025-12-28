@@ -398,22 +398,33 @@ def physical_interpretation_analysis(
     print("\n" + "-" * 50)
     print("PHYSICAL INTERPRETATION:")
     print("-" * 50)
-    print("""
+    
+    # Determine which class has higher gradient variance from actual data
+    ew_higher = np.mean(ew_gv) > np.mean(kpz_gv)
+    ratio = np.mean(ew_gv) / np.mean(kpz_gv) if ew_higher else np.mean(kpz_gv) / np.mean(ew_gv)
+    
+    print(f"""
     The KPZ equation: ∂h/∂t = ν∇²h + (λ/2)(∇h)² + η
     
-    The nonlinear term (λ/2)(∇h)² is what distinguishes KPZ from EW.
+    KEY FINDING: {'EW' if ew_higher else 'KPZ'} surfaces have {ratio:.1f}x HIGHER gradient variance.
     
-    The ML feature 'gradient_variance' directly measures Var(∇h) ∝ ⟨(∇h)²⟩
+    Physical explanation:
+    The KPZ nonlinear term (λ/2)(∇h)² acts as an effective smoothing mechanism.
+    It preferentially fills valleys and suppresses peaks, reducing local gradient
+    fluctuations compared to pure diffusive EW growth.
     
-    Therefore: The ML is learning to detect the physical signature of the
-    nonlinearity, without needing to measure scaling exponents!
+    The ML feature 'gradient_variance' measures Var(∇h) ∝ ⟨(∇h)²⟩
     
-    This explains why morphological features work at small L:
+    Therefore: The ML distinguishes universality classes by detecting
+    systematic differences in surface roughness characteristics—a local
+    quantity measurable at any system size.
+    
+    Why this works at small L:
     - Scaling exponents require asymptotic regime (large L, long t)
-    - But ⟨(∇h)²⟩ is a local quantity, measurable at any L
+    - But gradient statistics are local quantities, robust at finite L
     
-    The ML has discovered that local gradient statistics encode 
-    universality class information more robustly than global scaling.
+    Note: The r≈1.0 correlation between gradient_variance and ⟨(∇h)²⟩ is 
+    expected (Var(X) ≈ E[X²] for zero-mean X), confirming correct computation.
     """)
     
     return results

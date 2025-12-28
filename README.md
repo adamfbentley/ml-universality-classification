@@ -1,57 +1,92 @@
 # ML Universality Classification
 
-Machine learning identification of surface growth universality classes using morphological features that outperform traditional scaling analysis.
+Machine learning classification of surface growth universality classes (Edwards-Wilkinson vs KPZ) using morphological features.
 
 ## The Scientific Question
 
-Traditional universality classification relies on scaling exponents (α, β), which require large system sizes to converge. **But what if we could classify universality at small system sizes where scaling fails?**
+Traditional universality classification relies on scaling exponents (α, β), which require large system sizes and long times to converge to theoretical values. **Can morphological features classify universality at finite system sizes where scaling exponents are unreliable?**
 
-This project demonstrates that **morphological features—particularly gradient statistics—provide robust classification even when scaling exponents are meaningless**.
+This project investigates whether local surface statistics provide robust classification when asymptotic scaling analysis fails.
 
 ## Key Results
 
-### Exponents vs Morphological Features
+### Classification Accuracy by Method
 
-| System Size | Exponents Only | Gradient Variance Only | Full Features |
-|-------------|----------------|------------------------|---------------|
-| L=32 | 51% (random!) | 91% | 99% |
-| L=64 | 50% | 96% | 99% |
-| L=128 | 57% | 97% | 99% |
-| L=256 | 55% | 98% | 99% |
-| L=512 | 56% | 98% | 100% |
+*Results from 5-fold cross-validation, 80 samples per class per system size, averaged over 5 trials:*
 
-**At all system sizes, scaling exponents perform no better than random chance**, while morphological features achieve near-perfect classification.
+| System Size | Exponents Only | Gradient Only | Morphological | Full Features |
+|-------------|----------------|---------------|---------------|---------------|
+| L=32  | 50.4% ± 4.9% | 90.5% ± 4.7% | 94.6% ± 1.8% | 98.9% ± 0.9% |
+| L=64  | 55.2% ± 3.8% | 95.5% ± 1.6% | 97.4% ± 1.0% | 99.1% ± 0.5% |
+| L=128 | 55.0% ± 3.8% | 96.5% ± 2.6% | 98.6% ± 0.8% | 99.5% ± 0.5% |
+| L=256 | 52.5% ± 3.4% | 98.3% ± 1.1% | 99.2% ± 1.0% | 99.6% ± 0.3% |
+| L=512 | 54.6% ± 1.7% | 98.3% ± 0.7% | 99.5% ± 0.3% | 100% ± 0.0% |
 
-### Why This Works: Physical Interpretation
+**Key observation**: Exponents alone perform near random chance (50%) at all tested system sizes, while morphological features achieve >90% accuracy even at L=32.
+
+### Scaling Exponent Errors
+
+At finite L, measured exponents deviate significantly from theoretical values (α=0.5, β=0.25 for EW; α=0.5, β=1/3 for KPZ in 1+1D):
+
+| System Size | α error | β error |
+|-------------|---------|---------|
+| L=32  | 52% | 78% |
+| L=128 | 65% | 56% |
+| L=512 | 92% | 41% |
+
+These large errors explain why exponent-based classification fails.
+
+### Feature Group Importance (RandomForest)
+
+Feature importance varies with system size:
+
+| Group | L=32 | L=128 | L=512 |
+|-------|------|-------|-------|
+| temporal | 49% | 44% | 54% |
+| gradient | 24% | 27% | 4% |
+| morphological | 22% | 25% | 24% |
+| spectral | 3% | 3% | 18% |
+| scaling (α, β) | <1% | <1% | 0% |
+
+*Note: Scaling exponents contribute essentially nothing to classification at any system size.*
+
+## Physical Interpretation
 
 The KPZ equation: `∂h/∂t = ν∇²h + (λ/2)(∇h)² + η`
 
-The nonlinear term `(λ/2)(∇h)²` distinguishes KPZ from Edwards-Wilkinson dynamically, but interestingly this manifests as **different steady-state roughness characteristics**.
+The nonlinear term `(λ/2)(∇h)²` distinguishes KPZ from Edwards-Wilkinson. The ML features that work (gradient statistics, temporal evolution, height distributions) capture differences in local surface structure that arise from this nonlinearity.
 
-The ML feature `gradient_variance` measures `Var(∇h) ∝ ⟨(∇h)²⟩`. Our experiments show:
-- **EW surfaces**: gradient_variance ≈ 0.0025 (higher)
-- **KPZ surfaces**: gradient_variance ≈ 0.0006 (lower)
+**Why this works at finite L**: Scaling exponents describe asymptotic behavior (L→∞, t→∞), but local morphological statistics reflect the underlying dynamics immediately. The EW and KPZ equations produce surfaces with measurably different local properties regardless of whether the system has reached the scaling regime.
 
-This initially counterintuitive result has a physical explanation: the KPZ nonlinear term acts as an **effective smoothing mechanism** that reduces local gradient fluctuations. The term `(λ/2)(∇h)²` preferentially grows valleys (where ∇h changes sign) and suppresses peaks, leading to smoother surfaces with lower gradient variance than pure diffusive EW growth.
+## Limitations
 
-**The ML is detecting this systematic difference in surface roughness characteristics**—a local quantity measurable at any system size, unlike scaling exponents which require asymptotic behavior.
+- **Two classes only**: Only EW vs KPZ tested; more universality classes (MBE, VLDS) would strengthen the work
+- **Simulated data**: Real experimental validation not performed
+- **1+1D only**: Results are for 1D interfaces; 2+1D not tested
+- **Moderate sample sizes**: 80 samples per class may not capture full variance
+- **Single noise model**: Gaussian white noise only; colored noise not tested
+- **No hyperparameter tuning**: Default sklearn parameters used
 
-*Note: The correlation r≈1.0 between `gradient_variance` and `⟨(∇h)²⟩` is expected since Var(∇h) ≈ ⟨(∇h)²⟩ for zero-mean gradients—this confirms correct feature computation, not a discovered relationship.*
+## Reproduction
 
-### Feature Group Importance
+### Run the Scientific Study
 
+```bash
+cd src
+python scientific_study.py
 ```
-temporal       : 49%  (width_change, velocity)
-gradient       : 24%  (gradient_variance)
-morphological  : 22%  (height statistics)
-scaling        : <1%  (α, β exponents - useless!)
+
+Generates:
+- Exponents vs full features comparison
+- Feature ablation study
+- Complete method comparison
+- Results saved to `results/scientific_study_results.pkl`
+
+### Run the Main Experiment
+
+```bash
+python run_experiment.py
 ```
-
-## Implications
-
-1. **Finite-size classification**: ML can identify universality where traditional analysis fails
-2. **Physical insight**: Gradient statistics reveal that KPZ dynamics produce smoother surfaces than EW at finite times, providing a robust discriminator independent of scaling regime
-3. **Experimental relevance**: Real systems often have limited sizes where exponents are unreliable—local morphological features offer a practical alternative
 
 ## Usage
 
@@ -78,15 +113,24 @@ python run_experiment.py
 
 ```
 src/
-├── scientific_study.py      # Key scientific experiments
+├── scientific_study.py      # Main experiments (exponents vs features)
 ├── robustness_study.py      # System size, noise, crossover tests
 ├── physics_simulation.py    # EW and KPZ surface growth (Numba JIT)
-├── feature_extraction.py    # 16 features including gradient statistics
-├── ml_training.py           # RF, SVM, NN, Ensemble classifiers
-├── analysis.py              # Visualization
-├── config.py                # Configuration
+├── feature_extraction.py    # 16 features (scaling, spectral, morphological, etc.)
+├── ml_training.py           # RF, SVM classifiers
+├── config.py                # Simulation parameters
 └── run_experiment.py        # Main pipeline
 ```
+
+## Theoretical Background
+
+**Edwards-Wilkinson (1+1D)**: ∂h/∂t = ν∇²h + η  
+Exponents: α = 0.5, β = 0.25, z = 2.0
+
+**KPZ (1+1D)**: ∂h/∂t = ν∇²h + (λ/2)(∇h)² + η  
+Exponents: α = 0.5, β = 1/3, z = 3/2
+
+Both have the same roughness exponent α in 1+1D, making exponent-based classification particularly challenging.
 
 ## References
 
@@ -127,4 +171,4 @@ numba
 
 ## Author
 
-Developed as a computational physics project exploring the intersection of machine learning and statistical mechanics.
+A computational physics project exploring ML classification of non-equilibrium surface growth universality classes.

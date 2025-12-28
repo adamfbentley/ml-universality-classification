@@ -31,7 +31,7 @@ Also tested the crossover between EW and KPZ by gradually turning on the nonline
 
 ## What I'd change
 
-Only using 2 universality classes right now. Originally had 3 but realized Ballistic Deposition is the same class as KPZ (oops). Could add more but these two are enough to prove the concept.
+Only using 2 universality classes right now. Could add more but these two are enough to prove the concept.
 
 Haven't done any hyperparameter tuning, just using sklearn defaults. They work fine so not sure it's worth it.
 

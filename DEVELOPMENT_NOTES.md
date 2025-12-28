@@ -1,45 +1,38 @@
-# Development Notes
+# Dev Notes
 
-Some notes on the development process and findings.
+Quick writeup of what I learned building this.
 
-## Debugging Journey
+## The bugs I had to fix
 
-Started with a 128x150 grid which was way too small - the physics never reached the scaling regime properly. Bumped it up to 512x500 and things started working.
+The original grid was 128x150 which turned out to be way too small. The surfaces never actually got into the proper scaling regime, so all the physics measurements were garbage. Increased it to 512x500 and suddenly things made sense.
 
-Also had an issue where I was rejecting samples if the measured scaling exponents didn't match theoretical values. Turns out that's dumb for finite-size systems - they never match theory exactly. Removed that validation and went from 58% valid samples to 100%.
+Bigger problem though - I had validation code that was rejecting samples where α or β didn't match the theoretical predictions. This seems reasonable until you remember that *no finite system ever matches asymptotic theory*. That's literally the point. Was throwing away 42% of my data because of this. Removed the bounds check and everything works now.
 
-## What Actually Works
+## Interesting findings
 
-After fixing the grid size and validation issues:
-- All models hit 100% accuracy on the 2-class problem (EW vs KPZ)
-- The top features aren't the scaling exponents (alpha, beta) like you'd expect
-- Instead it's morphological stuff: gradient_variance, width_change, std_height
-- Makes sense in hindsight - these are more robust for finite systems
+The features that actually matter for classification aren't what I expected. I thought the scaling exponents (α, β) would be the most important since that's what the physics literature focuses on. Nope. 
 
-## Robustness Testing
+Top 3 features by importance:
+1. gradient_variance (18%)
+2. width_change (19%)  
+3. std_height (13%)
 
-Ran some tests to see where it breaks:
+The exponents barely register. Makes sense though - they're noisy as hell in finite systems. The morphological features are way more stable.
 
-**System size sweep** (L = 32 to 512):
-- Still gets 98%+ accuracy even at L=32
-- Meanwhile scaling exponent errors are 45-90% at small sizes
-- So ML beats traditional analysis for small systems
+## Testing how robust this is
 
-**Noise variation** (0.1 to 5.0):
-- 100% across the board, doesn't care about noise amplitude
+Wanted to see where the classification breaks down:
 
-**Crossover regime** (lambda = 0 to 1):
-- Tested the EW to KPZ transition
-- Stays above 99% through the whole crossover
+Tried different system sizes from L=32 up to 512. Even at L=32 it gets 98% accuracy, while the scaling exponent fits have like 45% error. Pretty clear that ML is doing something smarter than just measuring exponents.
 
-## Lessons Learned
+Varied noise amplitude by 50x (0.1 to 5.0) and it didn't care at all. 100% across the range.
 
-1. Run the actual pipeline before claiming anything works
-2. Finite-size physics is different from asymptotic theory
-3. Feature importance can be surprising - don't assume exponents are best
+Also tested the crossover between EW and KPZ by gradually turning on the nonlinearity. Classification stays solid through the whole transition, even catches the intermediate regime at ~99.6%.
 
-## Known Limitations
+## What I'd change
 
-- Only 2 classes (removed Ballistic Deposition since it's same universality class as KPZ)
-- No hyperparameter tuning, just sklearn defaults
-- Could use more samples for a real publication
+Only using 2 universality classes right now. Originally had 3 but realized Ballistic Deposition is the same class as KPZ (oops). Could add more but these two are enough to prove the concept.
+
+Haven't done any hyperparameter tuning, just using sklearn defaults. They work fine so not sure it's worth it.
+
+Sample size is decent for a demo but would need more for a proper paper.

@@ -18,7 +18,7 @@ Surface growth universality is traditionally identified through scaling exponent
 
 ## Experimental Design
 
-We conducted a systematic study comparing classification methods:
+I conducted a systematic study comparing classification methods:
 
 ### Study 1: Exponents vs Full Features
 Direct comparison across system sizes L = 32, 64, 128, 256, 512

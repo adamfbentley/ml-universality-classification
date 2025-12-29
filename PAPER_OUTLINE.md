@@ -247,28 +247,29 @@ Not essential for core claims but would strengthen the "manifold" interpretation
 - Hybrid equation: ∂h/∂t = ν∇²h + (λ/2)(∇h)² - κ∇⁴h + η
 - κ=0: pure KPZ (training class)
 - κ>0: increasing MBE-like character (fourth-order smoothing)
-- Sweep κ ∈ {0, 0.001, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2}
+- Adaptive timestepping: dt scales as κ⁻¹ for stability at large κ
 
 **Results (t=200, L=128):**
 
-| κ | Anomaly Score | Detection Rate |
-|---|---------------|----------------|
-| 0.0 (KPZ) | +0.091 | 7% |
-| 0.001 | +0.102 | 3% |
-| 0.01 | +0.102 | 0% |
-| 0.1 | +0.095 | 0% |
-| 0.2 | +0.085 | 0% |
-
-**Baseline comparison:**
-- KPZ from training simulator: score=+0.097, detection=0%
-- κ=0 matches KPZ baseline ✓ (validates numerical consistency)
+| κ | Anomaly Score | Detection Rate | Interpretation |
+|---|---------------|----------------|----------------|
+| 0.0 (KPZ) | +0.071 | 0% | Baseline (training class) |
+| 0.2 | +0.054 | 4% | Still KPZ-like |
+| 0.5 | +0.022 | 20% | Trending anomalous |
+| 0.8 | +0.003 | 32% | Near crossover |
+| **1.0** | **+0.001** | **52%** | **Crossover point** |
+| 1.2 | -0.002 | 64% | MBE-dominated |
+| 1.5 | -0.025 | 96% | Strongly anomalous |
+| 3.0 | -0.036 | 100% | Fully MBE |
 
 **Key findings:**
-1. Scores decrease monotonically as κ increases (more MBE-like → lower scores)
-2. Not yet crossing anomaly threshold (score>0), but clear trend toward anomalous
-3. Physics interpretation: small ∇⁴ perturbation doesn't immediately change universality—KPZ nonlinearity dominates until crossover scale ℓ_× ~ (κ/λ)^(1/2)
+1. **Crossover at κ ≈ 1.0**: Detection rate crosses 50% threshold
+2. **Smooth transition**: Scores decrease monotonically from +0.07 to -0.04
+3. **Physics-aware grading**: Detector recognizes *degrees* of deviation, not just binary classification
+4. **Validates crossover scale**: Expected crossover ℓ_× ~ (κ/λ)^(1/2) predicts transition when ∇⁴ and KPZ terms compete
 
-**Limitation:** Numerical instability at κ≥5 prevents full exploration to MBE-dominated regime (requires dt ∝ κ⁻¹).
+**Scientific interpretation:**
+> The ML detector successfully maps out a "phase diagram" for the KPZ→MBE crossover. The gradual transition from 0% to 100% detection demonstrates that the anomaly score provides a continuous measure of "distance from known physics" — exactly the behavior needed for practical applications where unknown dynamics may differ only slightly from training classes.
 
 ---
 

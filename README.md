@@ -211,14 +211,16 @@ numba
 
 ## New experiments (crossover study)
 
-The `crossover_v2.py` experiment demonstrates physics-aware graded detection:
+The `kpz_mbe_crossover_final.py` experiment demonstrates physics-aware graded detection:
 
 ```
-κ (MBE strength) | Anomaly Score | Trend
------------------|---------------|-------
-0.0 (pure KPZ)   | +0.091        | baseline
-0.1              | +0.085        | ↓
-0.2              | +0.085        | ↓
+κ (MBE strength) | Anomaly Score | Detection | Status
+-----------------|---------------|-----------|--------
+0.0 (pure KPZ)   | +0.071        | 0%        | baseline
+0.5              | +0.022        | 20%       | trending
+1.0              | +0.001        | 52%       | ← CROSSOVER
+1.5              | -0.025        | 96%       | MBE-dominated
+3.0              | -0.036        | 100%      | fully MBE
 ```
 
-Scores decrease monotonically as the ∇⁴ term increases, showing the detector recognizes *degrees* of deviation from KPZ—not just binary classification. Full MBE regime (large κ) requires smaller timesteps to explore.
+**Key finding:** The crossover from KPZ to MBE occurs at **κ ≈ 1.0**. The detector shows smooth, graded detection—not just binary "known/unknown" classification. This is exactly the "phase diagram" behavior needed for practical applications.

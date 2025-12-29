@@ -1,38 +1,41 @@
-# Dev Notes
+# Development Notes
 
-Quick writeup of what I learned building this.
+Notes on building and extending this project.
 
-## The bugs I had to fix
+## Initial issues
 
-The original grid was 128x150 which turned out to be way too small. The surfaces never actually got into the proper scaling regime, so all the physics measurements were garbage. Increased it to 512x500 and suddenly things made sense.
+Started with a 128×150 grid that was too small—surfaces never reached proper scaling regime. Bumped to 512×500 and the physics started making sense.
 
-Bigger problem though - I had validation code that was rejecting samples where α or β didn't match the theoretical predictions. This seems reasonable until you remember that *no finite system ever matches asymptotic theory*. That's literally the point. Was throwing away 42% of my data because of this. Removed the bounds check and everything works now.
+Also had validation code rejecting samples where exponents didn't match theory. Removed it once I realized that's backwards: finite systems *never* match asymptotic predictions, and that's the whole point of this work.
 
-## Interesting findings
+## Phase 1: Supervised classification (original)
 
-The features that actually matter for classification aren't what I expected. I thought the scaling exponents (α, β) would be the most important since that's what the physics literature focuses on. Nope. 
+The first version just did EW vs KPZ classification with a RandomForest. Worked fine (99%+ accuracy) but a reviewer could reasonably ask: so what? You're just building a lookup table.
 
-Top 3 features by importance:
-1. gradient_variance (18%)
-2. width_change (19%)  
-3. std_height (13%)
+Key finding from that phase: gradient and temporal features dominate. Scaling exponents (α, β) contribute essentially nothing to classification accuracy.
 
-The exponents barely register. Makes sense though - they're noisy as hell in finite systems. The morphological features are way more stable.
+## Phase 2: Anomaly detection (current)
 
-## Testing how robust this is
+Shifted focus to anomaly detection—can we flag surfaces from *unknown* universality classes? This is more scientifically interesting because it's a discovery tool, not just a classifier.
 
-Wanted to see where the classification breaks down:
+Added three new surface generators:
+- MBE (Molecular Beam Epitaxy): ∂h/∂t = -κ∇⁴h + η
+- VLDS (Villain-Lai-Das Sarma): conserved KPZ variant  
+- Quenched-KPZ: KPZ with frozen spatial disorder
 
-Tried different system sizes from L=32 up to 512. Even at L=32 it gets 98% accuracy, while the scaling exponent fits have like 45% error. Pretty clear that ML is doing something smarter than just measuring exponents.
+Isolation Forest trained on EW+KPZ detects all three as anomalous with 100% accuracy. This holds across system sizes (L=128, 256, 512).
 
-Varied noise amplitude by 50x (0.1 to 5.0) and it didn't care at all. 100% across the range.
+## Key experiments completed
 
-Also tested the crossover between EW and KPZ by gradually turning on the nonlinearity. Classification stays solid through the whole transition, even catches the intermediate regime at ~99.6%.
+**Cross-scale robustness**: Train at L=128, test at L=512. Still works. FPR actually drops from 12.5% to 2.5% at larger sizes.
 
-## What I'd change
+**Feature ablation**: Gradient features alone get 100% detection. Temporal features alone also get 100%. Traditional exponents (α,β) only get 79%.
 
-Only using 2 universality classes right now. Could add more but these two are enough to prove the concept.
+**Time-dependence**: Known classes (EW, KPZ) converge toward the learned manifold over time. Unknown classes stay separated. This confirms the detector is picking up real physics, not just early-time artifacts.
 
-Haven't done any hyperparameter tuning, just using sklearn defaults. They work fine so not sure it's worth it.
+## What's still missing
 
-Sample size is decent for a demo but would need more for a proper paper.
+- No experimental data testing
+- Only 1+1D (1D interfaces)
+- No noise robustness experiments
+- Hyperparameters are all defaults

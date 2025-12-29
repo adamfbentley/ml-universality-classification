@@ -1,52 +1,56 @@
 # ML Universality Classification
 
-Machine learning classification of surface growth universality classes using morphological features that remain discriminative at finite system sizes where traditional scaling exponents fail.
+Anomaly detection for surface growth universality classes. Trained on known classes (EW, KPZ), the detector flags surfaces from unknown dynamics—without needing labels for every possible universality class.
 
-## Motivation
+## What this actually does
 
-Surface growth universality is traditionally identified through scaling exponents (α, β) measured from interface width evolution: W(L,t) ~ L^α f(t/L^z). However, these exponents only converge to theoretical values in the asymptotic limit (L→∞, t→∞). Real experiments and simulations operate at finite sizes where:
+Scaling exponents (α, β) are the textbook way to identify universality classes, but they converge slowly. At realistic system sizes, the measurements are too noisy to be useful. I wanted to know: can we detect when a surface comes from a *different* universality class without having to identify which one?
 
-- Exponent measurements have large systematic errors
-- Crossover effects contaminate scaling behavior  
-- Classification based on exponents becomes unreliable
+Turns out yes. An Isolation Forest trained on Edwards-Wilkinson and KPZ surfaces reliably flags MBE, conserved-KPZ, and quenched-disorder KPZ as anomalous—even when tested at system sizes 4× larger than training.
 
-**This project asks**: Can local morphological features—gradient statistics, height distributions, temporal correlations—classify universality classes robustly at system sizes where scaling analysis fails?
+## Main results
 
-## Key Finding
+**Cross-scale detection works.** Train at L=128, test at L=512: still 100% detection of unknown classes. False positive rate actually improves from 12.5% to 2.5% at larger sizes.
 
-**Yes.** Morphological features achieve >90% classification accuracy at L=32, where scaling exponents perform no better than random chance (50%). This suggests that universality class information is encoded in local surface structure, not just asymptotic scaling behavior.
+**Gradient features beat scaling exponents.** Traditional α,β estimation gives 79% detection alone. Gradient variance alone: 100%. This makes sense—the KPZ nonlinearity shows up directly in gradient statistics, while exponent estimation requires clean power-law fits that don't converge at finite size.
 
-## Experimental Design
+**The detector respects physics.** Known classes (EW, KPZ) converge toward the learned manifold over time. Unknown classes stay anomalous throughout. The detector isn't just picking up on simulation artifacts.
 
-I conducted a systematic study comparing classification methods:
+## Experiments
 
-### Study 1: Exponents vs Full Features
-Direct comparison across system sizes L = 32, 64, 128, 256, 512
+### Cross-scale robustness
+Train Isolation Forest on EW+KPZ at L=128. Test on all classes at L=128, 256, 512. Detection holds across scales, FPR decreases.
 
-### Study 2: Feature Ablation
-Which feature groups contribute most? (scaling, spectral, morphological, gradient, temporal, correlation)
+### Feature ablation
+Which features actually matter? Tested each group in isolation:
+- Gradient features alone: 100% detection
+- Temporal features alone: 100%  
+- Scaling exponents (α, β) alone: 79%
+- Spectral features alone: 4.2%
 
-### Study 3: Complete Method Comparison
-Head-to-head: exponents-only vs gradient-only vs morphological-only vs full 16 features
-
-### Study 4: Robustness Testing
-Noise amplitude variation (0.1-5.0), crossover regime (EW→KPZ transition)
+### Time-dependence
+Does the detector just memorize early-time artifacts? No. Known classes converge toward the manifold as time increases. Unknown classes remain separated at all times.
 
 ## Results
 
-### Classification Accuracy
+### Anomaly detection performance
 
-*5-fold cross-validation, 80 samples per class, averaged over 5 independent trials:*
+| System Size | FPR (known classes) | MBE Detection | VLDS Detection | Quenched-KPZ Detection |
+|-------------|---------------------|---------------|----------------|------------------------|
+| L=128 (train) | 12.5% | 100% | 100% | 100% |
+| L=256 (test) | 12.5% | 100% | 100% | 100% |
+| L=512 (test) | 2.5% | 100% | 100% | 100% |
 
-| System Size | Exponents Only | Gradient Only | Morphological | Full Features |
-|-------------|----------------|---------------|---------------|---------------|
-| L=32  | 50.4% ± 4.9% | 90.5% ± 4.7% | 94.6% ± 1.8% | 98.9% ± 0.9% |
-| L=64  | 55.2% ± 3.8% | 95.5% ± 1.6% | 97.4% ± 1.0% | 99.1% ± 0.5% |
-| L=128 | 55.0% ± 3.8% | 96.5% ± 2.6% | 98.6% ± 0.8% | 99.5% ± 0.5% |
-| L=256 | 52.5% ± 3.4% | 98.3% ± 1.1% | 99.2% ± 1.0% | 99.6% ± 0.3% |
-| L=512 | 54.6% ± 1.7% | 98.3% ± 0.7% | 99.5% ± 0.3% | 100% ± 0.0% |
+### Feature ablation
 
-**Critical observation**: Exponents never exceed ~55% at any tested size—essentially random chance for a 2-class problem.
+| Feature Group | Detection Rate (alone) |
+|---------------|------------------------|
+| Gradient (2 features) | 100% |
+| Temporal (3 features) | 100% |
+| Morphological (2 features) | 95.8% |
+| Correlation (3 features) | 83.3% |
+| Scaling α,β (2 features) | 79.2% |
+| Spectral (4 features) | 4.2% |
 
 ### Why Exponents Fail
 
@@ -74,68 +78,62 @@ RandomForest feature group importance (varies with system size):
 
 Scaling exponents contribute essentially nothing. The classifier relies on temporal dynamics and local surface statistics.
 
-## Physical Interpretation
+## The physics
 
-The KPZ equation differs from Edwards-Wilkinson by the nonlinear term:
+Different universality classes come from different growth equations:
 
-**EW**: ∂h/∂t = ν∇²h + η  
-**KPZ**: ∂h/∂t = ν∇²h + **(λ/2)(∇h)²** + η
+- **EW**: ∂h/∂t = ν∇²h + η (linear diffusion)
+- **KPZ**: ∂h/∂t = ν∇²h + (λ/2)(∇h)² + η (nonlinear)
+- **MBE**: ∂h/∂t = -κ∇⁴h + η (fourth-order, conserved)
 
-This nonlinearity affects local surface structure immediately, not just asymptotic scaling. Features like gradient statistics, width evolution rates, and height distributions capture these dynamical differences at any system size.
+The structural differences show up in local statistics before they show up in global scaling behavior. A surface governed by ∇⁴h looks different from one governed by ∇²h even before you've waited long enough for the exponents to converge.
 
-**Why this matters**: Scaling exponents measure how the system *eventually* behaves. Morphological features measure how it *actually* behaves right now. The latter remains informative when the former hasn't converged.
+## Related work
 
-## Context & Novelty
+Carrasquilla & Melko (2017) showed neural networks can classify equilibrium phases directly from configurations. That work focused on things like Ising models—equilibrium systems with order parameters.
 
-ML for phase classification is well-established for equilibrium systems (Ising, Potts models) following Carrasquilla & Melko (2017). However, applications to **non-equilibrium surface growth** universality classes are sparse. Existing ML work on kinetic roughening (e.g., Makhoul et al. 2024) focuses on predicting exponent values, not classification.
+Surface growth is different: it's non-equilibrium, the "phases" are universality classes, and the standard approach uses scaling exponents that converge slowly. Makhoul et al. (2024) used ML to predict roughness evolution, but not to detect unknown universality classes.
 
-This project's contribution: demonstrating that morphological features enable robust classification at finite sizes where the traditional approach (scaling exponents) fails, with explicit quantitative comparison.
+The contribution here is showing that unsupervised anomaly detection works for this problem, and that it generalizes across system sizes.
 
 ## Limitations
 
-- **Two classes only**: EW vs KPZ; additional classes (MBE, VLDS) would strengthen generality
-- **Simulated data only**: No experimental validation
-- **(1+1)D only**: 1D interfaces; (2+1)D surfaces not tested
-- **Moderate sample sizes**: 80 per class per configuration
-- **Default hyperparameters**: No systematic tuning
-- **Single noise model**: Gaussian white noise only
+- **Simulated data only** — haven't tested on real experimental surfaces yet
+- **1+1D only** — these are 1D interfaces, not 2D surfaces
+- **Limited unknown classes** — tested MBE, VLDS, quenched-KPZ; other universality classes untested
+- **No hyperparameter tuning** — using sklearn defaults throughout
+- **Single noise model** — Gaussian white noise, no measurement noise or systematic errors
 
 ## Usage
 
-### Run the Scientific Study
-
 ```bash
 cd src
-python scientific_study.py
+
+# Run the full anomaly detection study
+python anomaly_detection.py
+
+# Feature ablation experiment
+python feature_ablation.py
+
+# Time-dependence validation
+python quick_time_test.py
 ```
 
-This generates:
-- Quantitative comparison of exponents vs morphological features
-- Feature ablation study across system sizes
-- Physical interpretation analysis
-- Publication-quality figures
-
-### Run the Main Experiment
-
-```bash
-python run_experiment.py
-```
-
-## Project Structure
+## Project structure
 
 ```
 src/
-├── scientific_study.py      # Core experiments: 4 systematic studies (~550 lines)
-├── robustness_study.py      # System size, noise, crossover analysis
+├── anomaly_detection.py     # Isolation Forest detector, cross-scale validation
+├── additional_surfaces.py   # MBE, VLDS, quenched-KPZ generators
+├── feature_ablation.py      # Which features matter?
+├── time_dependence_study.py # Validate scaling regime behavior
 ├── physics_simulation.py    # EW and KPZ surface growth (Numba-accelerated)
-├── feature_extraction.py    # 16 physics-informed features
-├── ml_training.py           # RandomForest, SVM classifiers
-├── config.py                # Simulation and model parameters
-└── run_experiment.py        # Full pipeline orchestration
+├── feature_extraction.py    # 16-dimensional feature vectors
+├── config.py                # Simulation parameters
 
-results/
-├── scientific_study_results.pkl    # All experimental data
-└── scientific_study.png            # Publication-quality figures
+docs/
+├── PAPER_OUTLINE.md         # Draft paper with all results
+├── MATHEMATICAL_FRAMEWORK.md # Theory perspective (geometric universality)
 ```
 
 ## Theoretical Background
@@ -187,14 +185,9 @@ scipy
 numba
 ```
 
-## Future Directions
+## Next steps
 
-- Additional universality classes (MBE, VLDS, directed percolation)
-- (2+1)D surface growth
-- Experimental data validation (AFM/STM thin film measurements)
-- Deep learning approaches (CNNs on raw surface images)
-- Crossover regime mapping
-
-## Author
-
-A computational physics investigation into ML-based universality classification for non-equilibrium surface growth.
+- Test on experimental AFM/STM data
+- Extend to 2+1D surfaces  
+- Add noise robustness testing
+- Try reverse-size training (L=512 → L=128)

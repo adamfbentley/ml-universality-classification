@@ -1,47 +1,25 @@
-# PROMPT FOR INDEPENDENT AI REVIEW
+# Review Request
 
-Copy and paste this into a new chat:
+This is an anomaly detection project for surface growth universality classes.
 
----
+**What it does**: Train Isolation Forest on Edwards-Wilkinson and KPZ surfaces, then detect surfaces from unknown dynamics (MBE, conserved-KPZ, quenched-disorder KPZ) without requiring labels for those classes.
 
-I need an unbiased, thorough review of a computational physics project. Please analyze the ml-universality-classification repository located at:
+**Main results**:
+- 100% detection of unknown classes at L=128, 256, 512
+- Cross-scale: train at L=128, test at L=512, still works
+- Gradient features alone: 100% detection
+- Traditional α,β exponents alone: 79% detection
+- Time-dependence: known classes converge over time, unknown stay separated
 
-`C:\Users\adamf\Desktop\pp\repositories\ml-universality-classification`
+**Key files**:
+- src/anomaly_detection.py - main detector
+- src/feature_ablation.py - which features matter
+- src/quick_time_test.py - time-dependence validation
+- PAPER_OUTLINE.md - draft paper with all results
 
-**Task**: Provide a brutally honest assessment of the scientific validity, methodology, and publishability of this work.
-
-**Background**: This project claims to use machine learning to classify surface growth universality classes (Edwards-Wilkinson vs KPZ) using morphological features, demonstrating that these features outperform traditional scaling exponents at finite system sizes.
-
-**Key Claims to Verify**:
-1. Scaling exponents achieve only ~50% accuracy (random chance)
-2. Morphological features achieve 91-100% accuracy
-3. The feature `gradient_variance` directly measures the KPZ nonlinear term
-4. Results are novel and publishable
-
-**Your Instructions**:
-1. Read `PROJECT_REVIEW_GUIDE.md` first - it contains the roadmap for your review
-2. Examine all files listed in priority order
-3. Check physics correctness (is KPZ/EW implemented right?)
-4. Verify ML methodology (any data leakage, overfitting?)
-5. Validate results (do claimed results match the code?)
-6. Look for red flags (suspiciously perfect results, exaggerated claims)
-7. Compare actual experiments to README claims
-
-**Critical Mindset**:
-- Assume nothing - verify everything
-- Be skeptical of "too good to be true" results
-- Check if this would pass peer review
-- Ignore any prior positive assessments
-- Focus on: "Is this actually good science?"
-
-**Output Required**:
-Follow the format specified in `PROJECT_REVIEW_GUIDE.md` section "Output Format". Include:
-- Technical scores (0-10) for physics, ML, statistics, code
-- Scientific scores (0-10) for novelty, evidence, insight, publication
-- List of errors/issues with severity ratings
-- Bottom-line verdict on validity and publishability
-
-**Be Brutally Honest**: The goal is truth, not validation. If you find problems, say so clearly. If claims are overstated, call it out. If it's actually good, explain why with evidence.
-
----
+**Questions for review**:
+1. Is the physics implementation correct (EW, KPZ, MBE equations)?
+2. Is the ML methodology sound (no data leakage, proper validation)?
+3. Are the claims supported by the results?
+4. What's missing for a journal submission?
 

@@ -150,200 +150,98 @@
 
 ---
 
-## Current State (What's Already Done)
+## Current State (December 2025)
 
-**Completed studies:**
-- ✅ Study 1: Exponents-only vs full features comparison
-- ✅ Study 2: Feature ablation (RF importance by group)  
-- ✅ Study 3: Physical interpretation (gradient → (∇h)² term)
-- ✅ Study 4: Complete method comparison across system sizes
+**Completed:**
+- ✅ Supervised EW vs KPZ classification (99%+ accuracy)
+- ✅ Cross-scale anomaly detection (100% detection at L=128, 256, 512)
+- ✅ Feature ablation (gradient/temporal features dominate)
+- ✅ Time-dependence validation (known classes converge, unknown stay separated)
+- ✅ Paper outline with all major results
+- ✅ Mathematical framework document (geometric perspective)
 
-**Key findings established:**
-- Scaling exponents alone → ~50% accuracy (random)
-- Gradient/morphological features → 90-98% accuracy
-- Full 16 features → 99-100% accuracy
-- Theoretical link: gradient_variance probes the nonlinear KPZ term
-
----
-
-## Remaining Limitations (What's NOT Addressed)
-
-| Limitation | Why It Matters |
-|------------|----------------|
-| **Only classifies known classes** | Can't detect new physics—just sorts into existing bins |
-| **No scale-dependent analysis** | Don't know at what length/time scales universality information emerges |
-| **Simulation-only** | No validation on real experimental surfaces |
-| **Results somewhat expected** | Need quantitative predictions, not just "features work better" |
+**Key findings:**
+- Gradient features alone achieve 100% detection of unknown classes
+- Traditional α,β estimation only gets 79%
+- FPR drops from 12.5% to 2.5% as system size increases
+- Detector respects asymptotic behavior (not just memorizing transients)
 
 ---
 
-## Phase 1: Anomaly Detection for Unknown Classes
-**Goal:** Transform from classifier to discovery tool
+## What's Left To Do
 
-**The Scientific Claim:** "Our method identifies when a surface belongs to an UNKNOWN universality class"
-
-### New Surface Classes to Implement
-
-| Class | Growth Equation | Expected α (1+1D) | Why It's Different |
-|-------|-----------------|-------------------|-------------------|
-| MBE | ∂h/∂t = -κ∇⁴h + η | α = 1.0, β = 0.25 | Conserved, linear |
-| VLDS | ∂h/∂t = -κ∇⁴h + λ∇²(∇h)² + η | α ≈ 1.0 | Conserved nonlinear |
-| Quenched KPZ | KPZ + frozen spatial noise | α ≈ 0.63 | Disorder effects |
-
-### Implementation
-
-```python
-# anomaly_detection.py
-class UniversalityAnomalyDetector:
-    """Detect surfaces from unknown universality classes."""
-    
-    def fit(self, known_features, known_labels):
-        """Learn distribution of EW and KPZ feature space."""
-        # Option 1: Isolation Forest on feature space
-        # Option 2: Autoencoder reconstruction error
-        # Option 3: Classifier confidence threshold
-    
-    def predict(self, features):
-        """Return: (predicted_class, is_anomaly, confidence)"""
-        pass
-```
-
-### Validation Protocol
-1. Train on EW + KPZ only
-2. Test on held-out EW/KPZ → should classify correctly
-3. Test on MBE/VLDS → should flag as "unknown"
-4. Measure: What % of unknowns are correctly flagged?
-
-**Success criterion:** >80% of unknown-class surfaces flagged as anomalous
+| Gap | Why it matters |
+|-----|----------------|
+| **No experimental data** | Simulations are clean; real AFM/STM data has measurement noise, drift, finite domains |
+| **1+1D only** | Real surfaces are 2D; might need different feature sets |
+| **No noise robustness** | Haven't tested what happens with measurement error |
+| **Reverse-size testing** | Train L=512, test L=128 would strengthen scale-invariance claim |
 
 ---
 
-## Phase 2: Scale-Dependent Analysis  
-**Goal:** Connect ML accuracy to physical correlation length
+## Phase 1: Anomaly Detection ✅ COMPLETE
 
-### The Experiment
+Goal was to transform from classifier to discovery tool. Done.
 
-```python
-# scale_analysis.py
-def classification_vs_scale(surfaces, labels, scales=[L/16, L/8, L/4, L/2, L]):
-    """At what scale does universality information emerge?"""
-    for scale in scales:
-        features = compute_features_at_scale(surface, scale)
-        accuracy = cross_val_score(classifier, features, labels)
-    # Plot accuracy vs scale
-```
+### Surface Classes Implemented
 
-### Theoretical Connection
+| Class | Equation | Status |
+|-------|----------|--------|
+| MBE | ∂h/∂t = -κ∇⁴h + η | ✅ Working |
+| VLDS | ∂h/∂t = -κ∇⁴h + λ∇²(∇h)² + η | ✅ Working |
+| Quenched KPZ | KPZ + frozen spatial noise | ✅ Working |
 
-The KPZ correlation length: ξ(t) ~ t^(1/z) where z = 3/2
+### Results
 
-**Hypothesis:** Classification accuracy should transition when probe scale crosses ξ(t)
-- Features at scales < ξ(t) → poor accuracy (pre-asymptotic)
-- Features at scales > ξ(t) → high accuracy (universality regime)
-
-**If validated:** This is a new way to measure correlation length via ML
+- Isolation Forest trained on EW+KPZ detects all unknown classes with 100% accuracy
+- Works across system sizes (L=128 → 512) without retraining
+- Feature ablation confirms gradient/temporal features are what matter
+- Time-dependence study confirms physics-aware behavior
 
 ---
 
-## Phase 3: Experimental Data Validation
-**Goal:** Prove method works on real surfaces
+## Phase 2: Scale-Dependent Analysis (Future)
 
-### Data Sources
-- Published AFM/STM datasets from surface growth experiments
-- Electrodeposition surfaces (claimed KPZ)
-- Thin film growth (claimed EW or MBE)
+Connect ML accuracy to physical correlation length. The KPZ correlation length grows as ξ(t) ~ t^(1/z). Hypothesis: detection accuracy should transition when probe scale crosses ξ(t).
 
-### Challenges
-- Different noise characteristics than simulations
-- Unknown ground truth in some cases
-- Domain shift between simulation and experiment
-
-### Approach
-1. Start with datasets where universality class is established
-2. Test if trained classifier agrees with literature
-3. If mismatch → interesting (either method wrong or new physics)
+Not yet implemented.
 
 ---
 
-## Implementation Plan
+## Phase 3: Experimental Validation (Future)
 
-### Week 1: Anomaly Detection Foundation
-- [ ] Implement MBE surface generator (∇⁴ term)
-- [ ] Implement Isolation Forest anomaly detector
-- [ ] Test: Does MBE get flagged as "not EW or KPZ"?
+Test on real AFM/STM surface data. Challenges: measurement noise, unknown ground truth, domain shift.
 
-### Week 2: Expand Unknown Classes  
-- [ ] Implement VLDS surface generator
-- [ ] Implement Quenched KPZ generator
-- [ ] Characterize anomaly detection performance across all unknown classes
-
-### Week 3: Scale Analysis
-- [ ] Implement scale-dependent feature computation
-- [ ] Run accuracy vs scale experiment
-- [ ] Compare to theoretical ξ(t) predictions
-
-### Week 4: Integration & Writing
-- [ ] Combine all results
-- [ ] Draft paper with new findings
-- [ ] Identify if experimental data is feasible
+Not yet implemented.
 
 ---
 
-## Code Modules to Create
+## Files Created
 
-### 1. `additional_surfaces.py`
-```python
-def generate_mbe_surface(L, T, kappa=1.0):
-    """∂h/∂t = -κ∇⁴h + η (Molecular Beam Epitaxy / Mullins-Herring)"""
-    # Fourth-order diffusion term
-    pass
+All these exist in `src/`:
 
-def generate_vlds_surface(L, T, kappa=1.0, lambda_=1.0):
-    """Villain-Lai-Das Sarma: conserved KPZ"""
-    pass
-
-def generate_quenched_kpz(L, T, nu, lambda_, disorder_strength):
-    """KPZ with spatially frozen (quenched) noise component"""
-    pass
-```
-
-### 2. `anomaly_detection.py`
-```python
-class UniversalityAnomalyDetector:
-    def __init__(self, method='isolation_forest'):
-        pass
-    def fit(self, X, y): pass
-    def predict(self, X): pass  # Returns (class, is_anomaly, confidence)
-```
-
-### 3. `scale_analysis.py`
-```python
-def compute_features_at_scale(surface, scale): pass
-def accuracy_vs_scale_study(surfaces, labels, scales): pass
-```
+- `additional_surfaces.py` — MBE, VLDS, quenched-KPZ generators
+- `anomaly_detection.py` — UniversalityAnomalyDetector class, cross-scale validation
+- `feature_ablation.py` — ablation study by feature group
+- `time_dependence_study.py` — validate scaling regime behavior
+- `quick_time_test.py` — simplified time test
 
 ---
 
-## Publication Impact by Outcome
+## Publication Potential
 
-| Outcome | Impact | Target Venue |
-|---------|--------|--------------|
-| Anomaly detection works on simulated unknowns | Moderate | J. Stat. Mech. |
-| + Scale analysis matches theoretical ξ(t) | Good | Phys. Rev. E |
-| + Works on experimental data | High | Phys. Rev. Letters |
-
----
-
-## Risk Assessment
-
-| Risk | Likelihood | Mitigation |
-|------|------------|------------|
-| MBE/VLDS too similar to EW | Medium | That's still a publishable result about universality |
-| Anomaly detection has high false positive rate | Medium | Tune threshold, use ensemble methods |
-| No experimental data available | High | Focus on simulation contribution, collaborate later |
-| Scale analysis shows no clean transition | Medium | May indicate features capture more than correlation length |
+| Outcome | Target Venue |
+|---------|--------------|
+| Current results (anomaly detection + ablation + time-dependence) | J. Stat. Mech. or Phys. Rev. E |
+| + Experimental validation | Phys. Rev. Letters |
 
 ---
+
+## Open Questions
+
+1. **Can ML detect UNKNOWN universality classes?** → Yes, answered.
+2. **At what scales does universality information emerge?** → Not yet tested.
+3. **Does this work on real experimental surfaces?** → Not yet tested.
 
 ## Decision Points
 

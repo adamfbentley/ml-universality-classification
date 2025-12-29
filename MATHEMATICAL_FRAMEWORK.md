@@ -333,5 +333,6 @@ Gradient variance is related to α via $\text{Var}(\nabla h) \sim L^{2\alpha - 2
 
 ---
 
-*Document version: 0.1*  
+*Document version: 0.2*  
 *Last updated: December 30, 2025*
+*Status: Working draft - conjectures motivated by empirical results*

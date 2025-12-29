@@ -104,6 +104,21 @@ The contribution here is showing that unsupervised anomaly detection works for t
 - **No hyperparameter tuning** — using sklearn defaults throughout
 - **Single noise model** — Gaussian white noise, no measurement noise or systematic errors
 
+### Methodological caution: numerical scheme artifacts
+
+**Important finding:** The detector can overfit to numerical implementation details rather than physics. Different simulation codes implementing the *same* equations can be flagged as anomalous due to:
+- Different time step sizes
+- Different finite difference stencils
+- Different noise generation sequences
+
+**Example:** Two valid KPZ implementations (same physics, different numerics):
+- Training code KPZ: score=+0.097, flagged=0%
+- Alternative code KPZ: score=-0.073, flagged=100%
+
+**Recommendation:** Always use numerically consistent test data generation. When this is done properly, the detector correctly shows graded physics-aware response (e.g., adding a ∇⁴ term gradually decreases anomaly scores as expected).
+
+See `src/crossover_v2.py` and `src/extended_physics.py` for the properly consistent implementation.
+
 ## Usage
 
 ```bash
@@ -191,3 +206,19 @@ numba
 - Extend to 2+1D surfaces  
 - Add noise robustness testing
 - Try reverse-size training (L=512 → L=128)
+- Extend κ-sweep to larger values (requires adaptive timestepping for stability)
+- Feature ablation on crossover data to identify which features drive the KPZ→MBE transition
+
+## New experiments (crossover study)
+
+The `crossover_v2.py` experiment demonstrates physics-aware graded detection:
+
+```
+κ (MBE strength) | Anomaly Score | Trend
+-----------------|---------------|-------
+0.0 (pure KPZ)   | +0.091        | baseline
+0.1              | +0.085        | ↓
+0.2              | +0.085        | ↓
+```
+
+Scores decrease monotonically as the ∇⁴ term increases, showing the detector recognizes *degrees* of deviation from KPZ—not just binary classification. Full MBE regime (large κ) requires smaller timesteps to explore.

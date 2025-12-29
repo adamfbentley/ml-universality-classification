@@ -92,7 +92,88 @@ def _kpz_mbe_hybrid_step(
     return new_interface
 
 
+def compute_stable_dt(diffusion: float, kappa: float, dx: float = 1.0) -> float:
+    """
+    Compute stable timestep for KPZ+MBE hybrid equation.
+    
+    Stability conditions:
+    - Diffusion (∇²): dt < dx² / (2*ν)
+    - Biharmonic (∇⁴): dt < dx⁴ / (16*κ)
+    
+    We use conservative factors (0.1x) to ensure stability.
+    """
+    dt_diffusion = 0.1 * dx**2 / (2 * diffusion) if diffusion > 0 else float('inf')
+    dt_biharmonic = 0.01 * dx**4 / (16 * kappa) if kappa > 0 else float('inf')
+    
+    # Also cap at 0.05 to match training data characteristics
+    return min(dt_diffusion, dt_biharmonic, 0.05)
+
+
 def generate_kpz_mbe_trajectory(
+    width: int,
+    height: int,
+    diffusion: float = 1.0,
+    nonlinearity: float = 1.0,
+    kappa: float = 0.0,
+    noise_strength: float = 1.0,
+    dt: float = None,  # Now optional - will compute if not provided
+    random_state: Optional[int] = None,
+    adaptive_dt: bool = True,
+) -> np.ndarray:
+    """
+    Generate trajectory with KPZ+MBE hybrid dynamics.
+    
+    Uses the same initialization and evolution structure as GrowthModelSimulator.
+    Now with adaptive timestepping for stability at large κ.
+    
+    Args:
+        width: System size L
+        height: Number of time steps T (in "simulation time units")
+        diffusion: Surface tension ν
+        nonlinearity: KPZ λ parameter
+        kappa: MBE biharmonic κ parameter (the sweep parameter)
+        noise_strength: Noise amplitude
+        dt: Time step (if None and adaptive_dt=True, computed automatically)
+        random_state: Random seed
+        adaptive_dt: If True, compute stable dt based on κ
+        
+    Returns:
+        trajectory: (height, width) array
+    """
+    if random_state is not None:
+        np.random.seed(random_state)
+    
+    # Compute stable timestep if not provided
+    if dt is None or adaptive_dt:
+        dt = compute_stable_dt(diffusion, kappa)
+    
+    # Number of substeps per recorded time unit
+    substeps = max(1, int(np.ceil(1.0 / dt)))
+    actual_dt = 1.0 / substeps
+        
+    # Initialize flat with small perturbations (SAME as GrowthModelSimulator)
+    interface = np.random.normal(0, 0.1, width)
+    trajectory = np.zeros((height, width))
+    
+    for t in range(height):
+        # Multiple substeps per recorded time unit for stability
+        for _ in range(substeps):
+            interface = _kpz_mbe_hybrid_step(
+                interface, 
+                diffusion=diffusion,
+                nonlinearity=nonlinearity,
+                kappa=kappa,
+                noise_strength=noise_strength,
+                dt=actual_dt,
+            )
+        # Remove global tilt (SAME centering as GrowthModelSimulator)
+        interface = interface - np.mean(interface)
+        trajectory[t] = interface.copy()
+        
+    return trajectory
+
+
+def generate_kpz_mbe_trajectory_fixed_dt(
     width: int,
     height: int,
     diffusion: float = 1.0,
@@ -103,27 +184,12 @@ def generate_kpz_mbe_trajectory(
     random_state: Optional[int] = None,
 ) -> np.ndarray:
     """
-    Generate trajectory with KPZ+MBE hybrid dynamics.
-    
-    Uses the same initialization and evolution structure as GrowthModelSimulator.
-    
-    Args:
-        width: System size L
-        height: Number of time steps T
-        diffusion: Surface tension ν
-        nonlinearity: KPZ λ parameter
-        kappa: MBE biharmonic κ parameter (the sweep parameter)
-        noise_strength: Noise amplitude
-        dt: Time step
-        random_state: Random seed
-        
-    Returns:
-        trajectory: (height, width) array
+    Original version with fixed dt=0.05 for backward compatibility.
+    Use this for κ < 0.5 to match training data exactly.
     """
     if random_state is not None:
         np.random.seed(random_state)
         
-    # Initialize flat with small perturbations (SAME as GrowthModelSimulator)
     interface = np.random.normal(0, 0.1, width)
     trajectory = np.zeros((height, width))
     
@@ -136,7 +202,6 @@ def generate_kpz_mbe_trajectory(
             noise_strength=noise_strength,
             dt=dt,
         )
-        # Remove global tilt (SAME centering as GrowthModelSimulator)
         interface = interface - np.mean(interface)
         trajectory[t] = interface.copy()
         

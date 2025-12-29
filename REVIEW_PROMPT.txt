@@ -1,0 +1,47 @@
+# PROMPT FOR INDEPENDENT AI REVIEW
+
+Copy and paste this into a new chat:
+
+---
+
+I need an unbiased, thorough review of a computational physics project. Please analyze the ml-universality-classification repository located at:
+
+`C:\Users\adamf\Desktop\pp\repositories\ml-universality-classification`
+
+**Task**: Provide a brutally honest assessment of the scientific validity, methodology, and publishability of this work.
+
+**Background**: This project claims to use machine learning to classify surface growth universality classes (Edwards-Wilkinson vs KPZ) using morphological features, demonstrating that these features outperform traditional scaling exponents at finite system sizes.
+
+**Key Claims to Verify**:
+1. Scaling exponents achieve only ~50% accuracy (random chance)
+2. Morphological features achieve 91-100% accuracy
+3. The feature `gradient_variance` directly measures the KPZ nonlinear term
+4. Results are novel and publishable
+
+**Your Instructions**:
+1. Read `PROJECT_REVIEW_GUIDE.md` first - it contains the roadmap for your review
+2. Examine all files listed in priority order
+3. Check physics correctness (is KPZ/EW implemented right?)
+4. Verify ML methodology (any data leakage, overfitting?)
+5. Validate results (do claimed results match the code?)
+6. Look for red flags (suspiciously perfect results, exaggerated claims)
+7. Compare actual experiments to README claims
+
+**Critical Mindset**:
+- Assume nothing - verify everything
+- Be skeptical of "too good to be true" results
+- Check if this would pass peer review
+- Ignore any prior positive assessments
+- Focus on: "Is this actually good science?"
+
+**Output Required**:
+Follow the format specified in `PROJECT_REVIEW_GUIDE.md` section "Output Format". Include:
+- Technical scores (0-10) for physics, ML, statistics, code
+- Scientific scores (0-10) for novelty, evidence, insight, publication
+- List of errors/issues with severity ratings
+- Bottom-line verdict on validity and publishability
+
+**Be Brutally Honest**: The goal is truth, not validation. If you find problems, say so clearly. If claims are overstated, call it out. If it's actually good, explain why with evidence.
+
+---
+

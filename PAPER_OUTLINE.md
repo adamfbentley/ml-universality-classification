@@ -239,6 +239,36 @@ For visualization, could plot:
 
 Not essential for core claims but would strengthen the "manifold" interpretation.
 
+### 3.4 Anomaly Score Geometry [COMPLETED ✓]
+
+**Goal:** Make the "manifold" claim operational with visualizations.
+
+**Results:**
+
+| System Size | Known Classes (EW, KPZ) | Unknown Classes | Separation |
+|-------------|-------------------------|-----------------|------------|
+| L=64 | +0.020 ± 0.04 | -0.103 ± 0.01 | 0.123 |
+| L=128 | +0.079 ± 0.04 | -0.100 ± 0.02 | 0.179 |
+| L=256 | +0.076 ± 0.02 | -0.095 ± 0.01 | 0.171 |
+| L=512 | +0.074 ± 0.01 | -0.097 ± 0.01 | 0.170 |
+
+**Key findings:**
+1. **Clear separation**: Known classes cluster at positive scores, unknown at negative
+2. **Score distributions narrow with L**: Variance decreases from ±0.04 to ±0.01
+3. **Separation stabilizes at L≥128**: Improves from 0.12 to 0.17, then plateaus
+4. **PCA shows distinct clusters**: Universality classes occupy separate regions in feature space
+
+**Scientific interpretation:**
+> The anomaly score distributions directly visualize the "manifold" structure. Known universality classes (EW, KPZ) form a compact region in feature space (positive scores), while unknown classes lie outside this region (negative scores). The narrowing of score distributions with increasing L is consistent with universality being an asymptotic phenomenon—larger systems converge more cleanly to their universal behavior.
+
+**Figures generated:**
+- `score_distributions.png`: Histograms of scores for each class at each L
+- `score_separation.png`: Mean±std scores showing separation vs L
+- `pca_visualization.png`: 2D PCA projection of feature space
+- `geometry_summary.png`: 4-panel publication figure
+
+---
+
 ### 3.5 Crossover Study: KPZ → MBE [COMPLETED ✓]
 
 **Goal:** Demonstrate graded anomaly detection across a parameter that interpolates between universality classes.

@@ -206,7 +206,7 @@ Table 2 shows detection rates when using only a single feature group.
 - Traditional scaling exponents achieve only 79%—worse than gradient or temporal alone
 - Spectral features are nearly useless for discrimination
 
-This suggests that local derivative statistics (gradient, temporal) encode universality structure more robustly than global power-law fits at finite size.
+Counterintuitively, local derivative statistics outperform the theoretically-universal global exponents at finite size. While universality theory privileges asymptotic scaling behavior encoded in α and β, practical discrimination in the finite-size regime appears to rely more heavily on local gradient and temporal fluctuation statistics. This may reflect that gradient variance Var(∇h) ~ L^(2α-2) provides a more direct, less noisy probe of universality structure than power-law fitting to w(L,t) ~ L^α f(t/L^z).
 
 ---
 
@@ -259,23 +259,25 @@ This data-driven approach complements, rather than replaces, traditional scaling
 
 ## References
 
-[1] Kadanoff, L. P. (1966). Scaling laws for Ising models near Tc. Physics 2, 263.
+[1] Kadanoff, L. P. (1966). Scaling laws for Ising models near T_c. *Physics Physique Fizika* **2**, 263–272.
 
-[2] Edwards, S. F. & Wilkinson, D. R. (1982). The surface statistics of a granular aggregate. Proc. R. Soc. Lond. A 381, 17.
+[2] Edwards, S. F. & Wilkinson, D. R. (1982). The surface statistics of a granular aggregate. *Proc. R. Soc. Lond. A* **381**, 17–31.
 
-[3] Kardar, M., Parisi, G. & Zhang, Y.-C. (1986). Dynamic scaling of growing interfaces. Phys. Rev. Lett. 56, 889.
+[3] Kardar, M., Parisi, G. & Zhang, Y.-C. (1986). Dynamic scaling of growing interfaces. *Phys. Rev. Lett.* **56**, 889–892.
 
-[4] Family, F. & Vicsek, T. (1985). Scaling of the active zone in the Eden process. J. Phys. A 18, L75.
+[4] Family, F. & Vicsek, T. (1985). Scaling of the active zone in the Eden process on percolation networks and the ballistic deposition model. *J. Phys. A: Math. Gen.* **18**, L75–L81.
 
-[5] Liu, F. T., Ting, K. M. & Zhou, Z.-H. (2008). Isolation Forest. ICDM.
+[5] Liu, F. T., Ting, K. M. & Zhou, Z.-H. (2008). Isolation Forest. *Proc. 8th IEEE Int. Conf. Data Mining*, 413–422.
 
-[6] Takeuchi, K. A. & Sano, M. (2010). Universal fluctuations of growing interfaces. Phys. Rev. Lett. 104, 230601.
+[6] Takeuchi, K. A. & Sano, M. (2010). Universal fluctuations of growing interfaces: Evidence in turbulent liquid crystals. *Phys. Rev. Lett.* **104**, 230601.
 
-[7] Barabási, A.-L. & Stanley, H. E. (1995). Fractal Concepts in Surface Growth. Cambridge University Press.
+[7] Barabási, A.-L. & Stanley, H. E. (1995). *Fractal Concepts in Surface Growth*. Cambridge University Press.
 
-[8] Carrasquilla, J. & Melko, R. G. (2017). Machine learning phases of matter. Nature Physics 13, 431.
+[8] Carrasquilla, J. & Melko, R. G. (2017). Machine learning phases of matter. *Nature Physics* **13**, 431–434.
 
-[9] van Nieuwenburg, E. P. L., Liu, Y.-H. & Huber, S. D. (2017). Learning phase transitions by confusion. Nature Physics 13, 435.
+[9] van Nieuwenburg, E. P. L., Liu, Y.-H. & Huber, S. D. (2017). Learning phase transitions by confusion. *Nature Physics* **13**, 435–439.
+
+**Note:** References [8] and [9] require verification of exact page ranges. All other citations verified from primary sources.
 
 ---
 

@@ -242,17 +242,32 @@ def create_figure_4_supporting(output_dir: Path):
     """
     set_publication_style()
     
+    # Load actual data from geometry study
+    with open(output_dir / "geometry_study_results.pkl", "rb") as f:
+        geo_data = pickle.load(f)
+    
     fig, axes = plt.subplots(1, 2, figsize=(10, 4))
     
     # ---- Panel A: Scale robustness ----
     ax1 = axes[0]
     
-    # Data from geometry study
-    sizes = [64, 128, 256, 512]
-    known_scores = [0.020, 0.079, 0.076, 0.074]
-    unknown_scores = [-0.103, -0.100, -0.095, -0.097]
-    known_std = [0.04, 0.04, 0.02, 0.01]
-    unknown_std = [0.01, 0.02, 0.01, 0.01]
+    # Extract from actual saved data
+    sizes = geo_data['system_sizes']
+    known_scores = []
+    known_std = []
+    unknown_scores = []
+    unknown_std = []
+    
+    for L in sizes:
+        sd = geo_data['score_distributions'][L]
+        # Known classes: EW and KPZ
+        known_mean = (sd['EW']['mean'] + sd['KPZ']['mean']) / 2
+        known_scores.append(known_mean)
+        known_std.append((sd['EW']['std'] + sd['KPZ']['std']) / 2)
+        # Unknown classes: MBE, VLDS, QuenchedKPZ
+        unknown_mean = (sd['MBE']['mean'] + sd['VLDS']['mean'] + sd['QuenchedKPZ']['mean']) / 3
+        unknown_scores.append(unknown_mean)
+        unknown_std.append((sd['MBE']['std'] + sd['VLDS']['std'] + sd['QuenchedKPZ']['std']) / 3)
     
     x = np.arange(len(sizes))
     width = 0.35

@@ -1,82 +1,138 @@
 # ML Universality Classification
 
-Anomaly detection for surface growth universality classes. Trained on known classes (EW, KPZ), the detector flags surfaces from unknown dynamics—without needing labels for every possible universality class.
+**Data-driven universality distance for finite-size surface growth dynamics.**
 
-## What this actually does
+An unsupervised anomaly detection approach that provides a continuous, quantitative metric of universality class proximity—directly from finite-size simulation data without fitting scaling exponents.
 
-Scaling exponents (α, β) are the textbook way to identify universality classes, but they converge slowly. At realistic system sizes, the measurements are too noisy to be useful. I wanted to know: can we detect when a surface comes from a *different* universality class without having to identify which one?
+## Key Result
 
-Turns out yes. An Isolation Forest trained on Edwards-Wilkinson and KPZ surfaces reliably flags MBE, conserved-KPZ, and quenched-disorder KPZ as anomalous—even when tested at system sizes 4× larger than training.
+We define a **universality distance D_ML(κ)** that quantifies proximity to the KPZ universality class:
 
-## Main results
+| Parameter | Value |
+|-----------|-------|
+| Crossover scale κ_c | 0.76 ± 0.05 |
+| Sharpness γ | 1.51 ± 0.16 |
+| Fit quality R² | 0.964 |
 
-**Cross-scale detection works.** Train at L=128, test at L=512: still 100% detection of unknown classes. False positive rate actually improves from 12.5% to 2.5% at larger sizes.
+In crossover regimes, D_ML provides **~2× better signal-to-noise** than traditional exponent fitting (SNR 3.4× vs 1.6-1.8×).
 
-**Gradient features beat scaling exponents.** Traditional α,β estimation gives 79% detection alone. Gradient variance alone: 100%. This makes sense—the KPZ nonlinearity shows up directly in gradient statistics, while exponent estimation requires clean power-law fits that don't converge at finite size.
+## What this does
 
-**The detector respects physics.** Known classes (EW, KPZ) converge toward the learned manifold over time. Unknown classes stay anomalous throughout. The detector isn't just picking up on simulation artifacts.
+Traditional scaling exponent analysis (α, β) is the textbook approach to identifying universality classes, but it struggles with:
+- Finite-size effects at accessible system sizes
+- Noisy power-law fits
+- Ambiguous results in crossover regimes
 
-## Experiments
+This project demonstrates that unsupervised anomaly detection can:
+1. **Reliably detect unknown universality classes** (100% detection rate at L=128-512)
+2. **Provide a continuous distance metric** D_ML that varies smoothly across crossovers
+3. **Extract crossover parameters from data** without fitting exponents
+4. **Outperform traditional methods** in regimes where exponent fitting is unreliable
 
-### Cross-scale robustness
-Train Isolation Forest on EW+KPZ at L=128. Test on all classes at L=128, 256, 512. Detection holds across scales, FPR decreases.
+## Main Results
 
-### Feature ablation
-Which features actually matter? Tested each group in isolation:
-- Gradient features alone: 100% detection
-- Temporal features alone: 100%  
-- Scaling exponents (α, β) alone: 79%
-- Spectral features alone: 4.2%
+### 1. Universality Distance D_ML(κ)
 
-### Time-dependence
-Does the detector just memorize early-time artifacts? No. Known classes converge toward the manifold as time increases. Unknown classes remain separated at all times.
+Sweeping the biharmonic coefficient κ from pure KPZ (κ=0) to MBE-dominated dynamics (large κ):
 
-## Results
+- D_ML is **continuous and monotonic**
+- Crossover scale κ_c = 0.76 extracted purely from data
+- Well-described by saturation curve: D_ML = κ^γ / (κ^γ + κ_c^γ)
 
-### Anomaly detection performance
+### 2. Comparison with Exponent Fitting
 
-| System Size | FPR (known classes) | MBE Detection | VLDS Detection | Quenched-KPZ Detection |
-|-------------|---------------------|---------------|----------------|------------------------|
-| L=128 (train) | 12.5% | 100% | 100% | 100% |
-| L=256 (test) | 12.5% | 100% | 100% | 100% |
-| L=512 (test) | 2.5% | 100% | 100% | 100% |
+| Method | SNR in Crossover Region |
+|--------|-------------------------|
+| α (structure function) | 1.6× |
+| β (width growth) | 1.8× |
+| **D_ML (ML distance)** | **3.4×** |
 
-### Feature ablation
+At L=128, traditional exponent fits yield α ≈ 0.24, β ≈ 0 (far from theoretical KPZ values), while D_ML cleanly tracks the crossover.
 
-| Feature Group | Detection Rate (alone) |
-|---------------|------------------------|
-| Gradient (2 features) | 100% |
-| Temporal (3 features) | 100% |
-| Morphological (2 features) | 95.8% |
-| Correlation (3 features) | 83.3% |
-| Scaling α,β (2 features) | 79.2% |
-| Spectral (4 features) | 4.2% |
+### 3. Cross-Scale Robustness
 
-### Why Exponents Fail
+| System Size | False Positive Rate | Unknown Class Detection |
+|-------------|---------------------|------------------------|
+| L=128 (train) | 12.5% | 100% |
+| L=256 | 12.5% | 100% |
+| L=512 | 2.5% | 100% |
 
-Measured exponent errors relative to theoretical values (EW: α=0.5, β=0.25; KPZ: α=0.5, β=1/3):
+Train at L=128, test at L=512: detection holds, FPR improves.
 
-| System Size | α error | β error |
-|-------------|---------|---------|
-| L=32  | 52% | 78% |
-| L=128 | 65% | 56% |
-| L=512 | 92% | 41% |
+### 4. Feature Ablation
 
-At finite L, exponents are too noisy to distinguish classes that share α=0.5 and differ only in β by ~0.08.
+| Feature Group | Detection Rate |
+|---------------|----------------|
+| Gradient (1 feature) | **100%** |
+| Temporal (3 features) | **100%** |
+| Scaling α, β (2 features) | 79% |
 
-### Feature Importance
+Gradient and temporal statistics encode universality more robustly than scaling exponents at finite size.
 
-RandomForest feature group importance (varies with system size):
+## Paper
 
-| Group | L=32 | L=128 | L=512 |
-|-------|------|-------|-------|
-| temporal | 49% | 44% | 54% |
-| gradient | 24% | 27% | 4% |
-| morphological | 22% | 25% | 24% |
-| spectral | 3% | 3% | 18% |
-| scaling (α, β) | <1% | <1% | 0% |
+See [PAPER_DRAFT.md](PAPER_DRAFT.md) for the full writeup.
 
-Scaling exponents contribute essentially nothing. The classifier relies on temporal dynamics and local surface statistics.
+**One-sentence summary:**
+> We define a data-driven universality distance that quantifies proximity to the KPZ universality class directly from finite-size surface data, enabling quantitative identification of crossover scales without requiring reliable exponent fits.
+
+## Repository Structure
+
+```
+src/
+├── physics_simulation.py      # EW, KPZ surface generators
+├── extended_physics.py        # MBE, VLDS, Quenched-KPZ generators
+├── feature_extraction.py      # 16-feature extraction
+├── anomaly_detection.py       # Isolation Forest wrapper
+├── universality_distance.py   # D_ML(κ) computation [MAIN RESULT]
+├── exponent_comparison.py     # α,β vs D_ML comparison
+├── generate_figures.py        # Publication figures
+└── results/                   # Data and figures
+```
+
+## Key Figures
+
+- **fig2_universality_distance.pdf**: Main result - D_ML(κ) with fit
+- **fig3_exponent_comparison.pdf**: α, β vs D_ML comparison
+- **fig4_supporting.pdf**: Scale robustness and feature ablation
+
+## Running
+
+```bash
+cd src
+
+# Generate universality distance results
+python universality_distance.py
+
+# Generate exponent comparison
+python exponent_comparison.py
+
+# Generate publication figures
+python generate_figures.py
+```
+
+## Citation
+
+If you use this work, please cite:
+```
+Bentley, A. (2024). Data-driven universality distance for finite-size 
+surface growth dynamics. [preprint]
+```
+
+## What This Is (and Isn't)
+
+**What D_ML is:**
+- A data-driven, operational observable
+- Computable from finite-size, finite-time data
+- Useful when traditional exponent fitting is unreliable
+
+**What it isn't:**
+- A fundamental RG invariant
+- A replacement for scaling theory
+- Universal across all feature choices
+
+The appropriate interpretation: D_ML quantifies proximity to a learned universality class manifold in feature space.
+
 
 ## The physics
 

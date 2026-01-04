@@ -20,20 +20,20 @@ This is mathematically elegant but operationally challenging:
 
 ### 1.2 An Alternative Viewpoint
 
-Our empirical work suggests a complementary perspective:
+The empirical work in this project suggests a complementary perspective:
 
 > **Universality classes appear as distinct, well-separated, scale-invariant regions in a space of statistical observables.**
 
 Key observations:
 1. Surfaces from different universality classes occupy non-overlapping regions in feature space
-2. This separation persists across system sizes (L = 128 → 512)
+2. This separation persists across system sizes ($L = 128 \to 512$)
 3. The regions appear to "sharpen" (concentrate) at larger scales
 
 This suggests universality has **geometric structure** in observable space that may be characterized without explicit RG construction.
 
 ### 1.3 What This Document Develops
 
-We propose a measure-theoretic framework where:
+I propose a measure-theoretic framework where:
 - Stochastic growth processes induce probability measures on observable space
 - Universality classes correspond to equivalence classes of processes whose measures converge to the same limit
 - Anomaly detection provides an operational probe of measure support
@@ -54,7 +54,7 @@ A stochastic growth process is a probability measure $\mathbb{P}$ on the space o
 - Kardar-Parisi-Zhang: $\partial_t h = \nu \nabla^2 h + \frac{\lambda}{2}(\nabla h)^2 + \eta$
 - Molecular Beam Epitaxy: $\partial_t h = -\kappa \nabla^4 h + \eta$
 
-where $\eta(x,t)$ is space-time white noise.
+where $\eta(x,t)$ is space-time white noise with $\langle \eta(x,t) \eta(x',t') \rangle = 2D\delta(x-x')\delta(t-t')$.
 
 **Definition 2.2 (Realization).**  
 A realization $\omega$ is a sample path $h_\omega(x,t)$ drawn from $\mathbb{P}$.
@@ -73,7 +73,7 @@ where $\mathcal{H}_{L,T}$ is the space of height functions on $[0,L] \times [0,T
 - Spectral features: from Fourier analysis of $h(x, T)$
 
 **Remark.**  
-The choice of $\Phi$ is not unique. Different choices probe different aspects of the process. Our empirical work suggests certain observables (gradient, temporal statistics) are more discriminative than others (traditional exponents at finite size).
+The choice of $\Phi$ is not unique. Different choices probe different aspects of the process. The empirical work in this project suggests certain observables (gradient, temporal statistics) are more discriminative than others (traditional exponents at finite size).
 
 ### 2.3 Induced Measures
 
@@ -94,9 +94,9 @@ Intuitively: the region in feature space where samples from this process actuall
 For finite $L, T$, the support $\text{supp}(\mu_{L,T}^\Phi)$ is a "thickened" region in $\mathbb{R}^d$. We denote its effective diameter as $\delta(L,T)$.
 
 **Empirical Observation:**  
-In our experiments, we observe that the false positive rate (proportion of known-class samples flagged as anomalous) decreases with $L$:
-- L = 128: FPR ≈ 12.5%
-- L = 512: FPR ≈ 2.5%
+In the experiments presented in this project, the false positive rate (proportion of known-class samples flagged as anomalous) decreases with $L$:
+- $L = 128$: FPR $\approx 12.5\%$
+- $L = 512$: FPR $\approx 2.5\%$
 
 This is consistent with $\delta(L,T) \to 0$ as $L,T \to \infty$, i.e., the measure concentrates.
 
@@ -168,7 +168,7 @@ Feature ablation shows that multiple feature subsets (gradient alone, temporal a
 
 In the RG picture, coarse-graining defines a flow on the space of effective theories (or equivalently, probability measures on configurations). Fixed points of this flow correspond to scale-invariant theories.
 
-**Question:** How does our observable-space structure relate to RG?
+**Question:** How does the observable-space structure proposed here relate to RG?
 
 ### 4.2 Conjectural Connection
 
@@ -184,9 +184,9 @@ The limit measure $\mu_\infty^\Phi$ in Conjecture 3.3 is determined by the RG fi
 - Observable features that survive the $L,T \to \infty$ limit must be scale-invariant
 - Scale-invariant quantities are precisely what RG fixed points determine
 
-### 4.3 What We Don't Claim
+### 4.3 What I Don't Claim
 
-We explicitly do **not** claim:
+I explicitly do **not** claim:
 1. That observable-space structure is a complete characterization of universality
 2. That this replaces RG theory
 3. That the choice of $\Phi$ is canonical
@@ -211,7 +211,7 @@ $$\hat{S}_{L,T} \approx \text{supp}(\mu_{L,T}^{\Phi,\text{known}})$$
 A sample $\phi = \Phi(h)$ is flagged as anomalous if:
 $$\phi \notin \hat{S}_{L,T}$$
 
-**Interpretation in our framework:**  
+**Interpretation in this framework:**  
 Anomaly detection tests whether a sample lies within the support of the learned measure family.
 
 **Key insight:**  
@@ -236,7 +236,7 @@ The fact that detection works across scales (train at L=128, test at L=512) prov
 | Cross-scale robustness | Separation persists under $L \to 2L \to 4L$ |
 | FPR decreases with L | Measure concentrates: $\delta(L,T) \downarrow$ |
 | Multiple feature groups work | Separation stable under projections |
-| Gradient >> α,β at finite size | Some projections more discriminative than theory-canonical ones |
+| Gradient $\gg$ $\alpha,\beta$ at finite size | Some projections more discriminative than theory-canonical ones |
 
 ### 6.2 What Remains to Test
 
@@ -276,28 +276,186 @@ The fact that detection works across scales (train at L=128, test at L=512) prov
 
 ---
 
-## 8. Toward a Paper
+## 8. Paths to Formalization
 
-### 8.1 Possible Title
+This section outlines concrete steps to strengthen the mathematical framework, motivated by the need to move from empirical observation to rigorous theory.
+
+### 8.1 Formalizing the Separation Distance $\delta(L,T)$
+
+The effective diameter $\delta(L,T)$ is currently defined loosely. More rigorous options:
+
+**Option 1: Wasserstein Distance**
+
+Define the separation between classes via the $p$-Wasserstein distance:
+$$W_p(\mu_1, \mu_2) = \left( \inf_{\gamma \in \Gamma(\mu_1, \mu_2)} \int_{\mathbb{R}^d \times \mathbb{R}^d} \|x - y\|^p \, d\gamma(x,y) \right)^{1/p}$$
+
+where $\Gamma(\mu_1, \mu_2)$ is the set of couplings with marginals $\mu_1, \mu_2$.
+
+**Advantages:**
+- Metrizes weak convergence (for $p=1$ on compact spaces)
+- Geometrically meaningful (optimal transport interpretation)
+- Computable from samples via empirical approximation
+
+**Empirical test:** Compute $W_1(\mu^{\text{EW}}, \mu^{\text{KPZ}})$ at different $L$ and verify it increases with scale.
+
+**Option 2: Kullback-Leibler Divergence**
+
+For absolutely continuous measures:
+$$D_{KL}(\mu_1 \| \mu_2) = \int \log\left(\frac{d\mu_1}{d\mu_2}\right) d\mu_1$$
+
+**Advantages:**
+- Information-theoretic interpretation
+- Related to statistical distinguishability
+- Connects to large deviations theory
+
+**Disadvantage:** Requires density estimation; infinite when supports don't overlap.
+
+**Option 3: Maximum Mean Discrepancy (MMD)**
+
+Using a reproducing kernel Hilbert space (RKHS):
+$$\text{MMD}^2(\mu_1, \mu_2) = \|\mathbb{E}_{x \sim \mu_1}[\phi(x)] - \mathbb{E}_{y \sim \mu_2}[\phi(y)]\|_{\mathcal{H}}^2$$
+
+**Advantages:**
+- Easily computable from samples
+- No density estimation required
+- Well-suited to ML settings
+
+### 8.2 Toy Cases Amenable to Proof
+
+**Case 1: Edwards-Wilkinson (Gaussian)**
+
+EW is exactly solvable. The stationary measure on height configurations is Gaussian with known covariance structure. For the observable map $\Phi = (\text{Var}(h), \text{Var}(\nabla h))$:
+
+- The induced measure $\mu_{L,T}^{\Phi,\text{EW}}$ is a 2D Gaussian
+- Mean and covariance can be computed analytically from EW Green's function
+- Concentration as $L \to \infty$ follows from central limit theorem considerations
+
+**Conjecture (Provable):** For EW, $\delta(L,T) \sim L^{-1/2}$ for suitable observables.
+
+**Case 2: KPZ (Non-Gaussian)**
+
+KPZ height distributions are characterized by Tracy-Widom statistics in the scaling limit. The key observable differences from EW:
+
+- Non-zero skewness (KPZ: $\approx 0.29$, EW: $= 0$)
+- Different kurtosis (KPZ has heavier tails)
+- Non-Gaussian slope distribution
+
+**Conjecture:** The skewness of $h(x,T) - \langle h \rangle$ provides a simple discriminator:
+$$\gamma_1^{\text{EW}} = 0 \quad \text{vs} \quad \gamma_1^{\text{KPZ}} \to 0.29... \text{ (Tracy-Widom)}$$
+
+This could be proven using exact KPZ results from integrable systems.
+
+### 8.3 Connection to Field-Theoretic Correlators
+
+In field theory, universality classes are characterized by correlation functions. The observable map $\Phi$ can be viewed as a finite set of "projected correlators":
+
+**Two-point function:**
+$$C_2(r) = \langle h(x+r) h(x) \rangle - \langle h \rangle^2$$
+
+The roughness exponent $\alpha$ extracts the scaling: $C_2(r) \sim r^{2\alpha}$.
+
+**Higher correlators:**
+$$C_n(r_1, \ldots, r_{n-1}) = \langle h(x) h(x+r_1) \cdots h(x+r_{n-1}) \rangle_c$$
+
+where $\langle \cdot \rangle_c$ denotes cumulants.
+
+**Insight:** The gradient variance $\text{Var}(\nabla h) = C_2''(0)$ is a local correlator that captures universality information without long-range fitting. This may explain why it outperforms $\alpha$, $\beta$ at finite size—it's a more direct probe of the local field structure.
+
+**Proposed extension:** Include connected 3-point and 4-point statistics in $\Phi$ to capture non-Gaussianity explicitly.
+
+### 8.4 Deep Learning for Optimal $\Phi$
+
+The current feature set is hand-engineered. A principled approach:
+
+**Autoencoder approach:**
+1. Train a variational autoencoder (VAE) on height fields from multiple classes
+2. The latent space defines a learned $\Phi$
+3. Measure class separation in latent space
+
+**Advantages:**
+- Automatic feature discovery
+- May find more discriminative observables
+- Connects to representation learning literature
+
+**Proposed experiment:** Compare Isolation Forest performance using:
+- Hand-engineered 16 features (current)
+- VAE latent space (8-32 dimensions)
+- Neural network embeddings from supervised pre-training
+
+### 8.5 Validation with Real Experimental Data
+
+The framework currently relies entirely on synthetic simulations. Real-world validation requires:
+
+**Data sources:**
+- Thin film growth experiments (AFM/STM surface scans)
+- Turbulent liquid crystal interfaces (Takeuchi & Sano 2010 data)
+- Paper wetting front experiments
+- Bacterial colony growth imaging
+
+**Challenges:**
+- Measurement noise (not white Gaussian)
+- Limited statistics (few independent realizations)
+- Unknown "ground truth" universality class
+- Finite observation windows
+
+**Proposed approach:**
+1. Start with Takeuchi-Sano liquid crystal data (KPZ class verified experimentally)
+2. Apply same feature extraction pipeline
+3. Test whether ML-extracted features fall within synthetic KPZ support
+4. Quantify robustness to measurement noise
+
+### 8.6 Extension to 2+1D
+
+In 2+1 dimensions, KPZ exponents are only known numerically ($\alpha \approx 0.39$, $\beta \approx 0.24$). Key differences:
+
+- No exact solutions (unlike 1+1D integrable structure)
+- Computational cost scales as $L^2$ per timestep
+- Upper critical dimension $d_c = 2$ creates logarithmic corrections
+
+**Proposed computational approach:**
+1. Implement 2+1D EW (trivial: $\alpha = 0$, $\beta = 0$, Gaussian)
+2. Implement 2+1D KPZ with GPU acceleration
+3. Test whether gradient-based features still discriminate
+4. Map crossover behavior for 2+1D KPZ+MBE
+
+**Theoretical question:** Does the Separation Conjecture hold in 2+1D, or is it specific to 1+1D where exact solutions exist?
+
+---
+
+## 9. Toward a Theory Paper
+
+---
+
+## 9. Toward a Theory Paper
+
+### 9.1 Possible Title
 - "Universality Classes as Geometric Objects in Observable Space"
 - "A Measure-Theoretic Perspective on Stochastic Growth Universality"
 - "Observable-Space Structure of Kinetic Roughening Universality Classes"
 
-### 8.2 Key Contributions to Claim
+### 9.2 Key Contributions to Claim
 1. **Framework:** Formal definitions of observable embeddings, induced measures, and geometric universality
 2. **Conjectures:** Precise statements of Separation, Concentration, and RG Correspondence
-3. **Empirical motivation:** Summary of results supporting the framework
-4. **Open problems:** Clear articulation of what remains to prove
+3. **Provable cases:** Explicit calculation for EW (Gaussian) and partial results for KPZ
+4. **Empirical motivation:** Summary of results supporting the framework
+5. **Open problems:** Clear articulation of what remains to prove
 
-### 8.3 What This Paper Is NOT
-- A theorem paper (no rigorous proofs)
+### 9.3 Target Venues
+- **Physical Review E:** Interdisciplinary, accepts theoretical frameworks with numerical support
+- **Journal of Statistical Mechanics (JSTAT):** Focus on exact results and new theoretical approaches
+- **Journal of Physics A:** Mathematical physics, suitable for measure-theoretic framing
+- **New Journal of Physics:** Open access, welcomes novel perspectives
+
+### 9.4 What This Paper Is NOT
+- A theorem paper (limited rigorous proofs, but some tractable cases)
 - A replacement for RG theory
 - A claim of novelty for the mathematics itself
 
-### 8.4 What This Paper IS
+### 9.5 What This Paper IS
 - A **conceptual framework** grounded in empirical evidence
 - An **operational viewpoint** complementary to RG
 - A **bridge** between ML methods and theoretical physics
+- A **roadmap** for rigorous development
 
 ---
 
@@ -317,10 +475,10 @@ The fact that detection works across scales (train at L=128, test at L=512) prov
 
 ## Appendix B: Relation to Feature Ablation Results
 
-Our feature ablation reveals that gradient and temporal features outperform traditional scaling exponents (α, β) at finite size. In the language of this framework:
+The feature ablation study reveals that gradient and temporal features outperform traditional scaling exponents ($\alpha$, $\beta$) at finite size. In the language of this framework:
 
 **Interpretation:**  
-Let $\Phi_\alpha = (\alpha, \beta)$ and $\Phi_{\text{grad}} = (\text{grad\_var}, \text{width\_change}, ...)$
+Let $\Phi_\alpha = (\alpha, \beta)$ and $\Phi_{\text{grad}} = (\text{grad\_var}, \text{width\_change}, \ldots)$
 
 At finite $L, T$:
 - $\text{supp}(\mu_{L,T}^{\Phi_\alpha})$ for different classes may overlap significantly
@@ -329,10 +487,10 @@ At finite $L, T$:
 **Conjecture:** As $L, T \to \infty$, both projections should show separation (if Conjecture 3.4 holds), but the rate of convergence differs.
 
 **Physical interpretation:**  
-Gradient variance is related to α via $\text{Var}(\nabla h) \sim L^{2\alpha - 2}$, but is more robustly computable at finite size. The information content is similar; the estimator quality differs.
+Gradient variance is related to $\alpha$ via $\text{Var}(\nabla h) \sim L^{2\alpha - 2}$, but is more robustly computable at finite size. The information content is similar; the estimator quality differs.
 
 ---
 
-*Document version: 0.2*  
-*Last updated: December 30, 2025*
-*Status: Working draft - conjectures motivated by empirical results*
+*Document version: 0.3*  
+*Last updated: January 4, 2026*  
+*Status: Working draft - conjectures motivated by empirical results, paths to formalization outlined*

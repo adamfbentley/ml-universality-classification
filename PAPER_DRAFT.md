@@ -8,7 +8,7 @@
 
 We demonstrate that unsupervised anomaly detection provides a quantitative, continuous metric of universality class proximity directly from finite-size simulation data without fitting scaling exponents. An Isolation Forest trained on Edwards-Wilkinson and Kardar-Parisi-Zhang surfaces identifies distinct growth dynamics (molecular beam epitaxy, conserved KPZ, quenched-disorder KPZ) as anomalous with 100% detection at system sizes L=128–512. By normalizing anomaly scores across a parameter sweep interpolating between universality classes (KPZ→MBE via biharmonic coefficient κ), we extract a universality distance D_ML(κ) with crossover scale κ_c = 0.76 ± 0.05 and sharpness γ = 1.51 ± 0.16 (R² = 0.96). This provides a data-driven alternative to traditional power-law exponent fitting for characterizing universality class membership and crossover behavior. In the crossover regime, D_ML achieves approximately twice the signal-to-noise ratio of traditional scaling exponent estimation. Feature ablation reveals that gradient and temporal statistics achieve 100% detection alone, while traditional scaling exponents (α, β) achieve only 79%—suggesting that local derivative statistics encode universality more robustly than global exponent estimation at finite size.
 
-**Keywords:** universality classes, anomaly detection, machine learning, surface growth, KPZ equation
+**Keywords:** universality classes, anomaly detection, machine learning, surface growth, gradient statistics
 
 ---
 
@@ -201,12 +201,16 @@ Table 2 shows detection rates when using only a single feature group.
 | Spectral | 4.2% |
 
 **Key findings:**
-- Gradient features alone achieve 100% detection with just 1 feature
+- Gradient features alone achieve 100% detection—measuring mean |∇h| directly from surface data
 - Temporal features also achieve 100% detection
 - Traditional scaling exponents achieve only 79%—worse than gradient or temporal alone
 - Spectral features are nearly useless for discrimination
 
-Counterintuitively, local derivative statistics outperform the theoretically-universal global exponents at finite size. While universality theory privileges asymptotic scaling behavior encoded in α and β, practical discrimination in the finite-size regime appears to rely more heavily on local gradient and temporal fluctuation statistics. This may reflect that gradient variance Var(∇h) ~ L^(2α-2) provides a more direct, less noisy probe of universality structure than power-law fitting to w(L,t) ~ L^α f(t/L^z).
+**Why this finding challenges conventional thinking:** The standard approach treats gradient statistics as a means to extract the "universal" roughness exponent α, which then defines universality class membership. Here we demonstrate that direct gradient measurement outperforms the extracted exponents themselves. This suggests a fundamental disconnect between theoretical universality (asymptotic scaling) and practical finite-size discrimination.
+
+Finite-size corrections should kill this: The scaling Var(∇h) ~ L^(2α-2) is an asymptotic relationship. At L=128, there should be significant finite-size corrections, crossover effects, and fluctuations that would make direct gradient measurement unreliable. The fact that it works better than α, β fitting is surprising.
+
+While gradient variance is known to scale as Var(∇h) ~ L^(2α-2), conventional wisdom holds that measuring α and β—the defining characteristics of universality classes—should provide optimal discrimination. The superior performance of raw gradient statistics implies that finite-size effects, crossover corrections, and measurement noise corrupt exponent fitting more severely than direct local measurements. Rather than using gradients to extract universal exponents, it may be more robust to bypass exponent fitting entirely and measure local surface properties directly.
 
 ---
 
@@ -228,6 +232,8 @@ It is not:
 The appropriate interpretation is: D_ML quantifies proximity to a learned universality class manifold in feature space. It provides practical value when traditional exponent fitting is unreliable.
 
 ### 4.2 Methodological Considerations
+
+**Gradient statistics vs. scaling exponents:** The established scaling relationship Var(∇h) ~ L^(2α-2) links gradient statistics to universality classes through the roughness exponent α. However, this relationship is typically exploited to *measure* α, not to *bypass* it for classification. Our finding that direct gradient measurement (100% detection) outperforms fitted exponents (79% detection) challenges the conventional approach and suggests that finite-size classification benefits more from local measurements than global scaling analysis.
 
 **Numerical consistency:** We found that ML anomaly detectors can overfit to numerical implementation details rather than underlying physics. Different simulation schemes for the same equation (different dt, stencils) can trigger false anomaly detection. All results use numerically consistent implementations to avoid this artifact.
 

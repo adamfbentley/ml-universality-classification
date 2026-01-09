@@ -4,6 +4,16 @@
 
 An unsupervised anomaly detection approach that provides a continuous, quantitative metric of universality class proximity—directly from finite-size simulation data without fitting scaling exponents.
 
+## Results in 30 seconds
+
+**Main result:** a continuous universality distance D_ML(kappa) with an extracted crossover scale.
+
+![Universality distance D_ML vs kappa](src/results/universality_distance_main.png)
+
+**Comparison:** ML distance vs traditional exponent fitting in the crossover regime.
+
+![Exponent fitting vs ML distance comparison](src/results/exponent_vs_ml_main.png)
+
 ## Key Result
 
 We define a **universality distance D_ML(κ)** that quantifies proximity to the KPZ universality class:

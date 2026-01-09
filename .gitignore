@@ -43,10 +43,10 @@ Thumbs.db
 *.pkl
 *.npz
 *.h5
-results/
-outputs/
-data/raw/
-data/processed/
+/results/
+/outputs/
+/data/raw/
+/data/processed/
 
 # Jupyter Notebooks
 .ipynb_checkpoints/

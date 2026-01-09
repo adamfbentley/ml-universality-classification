@@ -4,7 +4,7 @@
 
 An unsupervised anomaly detection approach that provides a continuous, quantitative metric of universality class proximity—directly from finite-size simulation data without fitting scaling exponents.
 
-## Results in 30 seconds
+## Results Snapshot
 
 **Main result:** a continuous universality distance D_ML(kappa) with an extracted crossover scale.
 

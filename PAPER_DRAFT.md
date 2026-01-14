@@ -6,7 +6,7 @@
 
 ## Abstract
 
-We demonstrate that unsupervised anomaly detection provides a quantitative, continuous metric of universality class proximity directly from finite-size simulation data without fitting scaling exponents. An Isolation Forest trained on Edwards-Wilkinson and Kardar-Parisi-Zhang surfaces identifies distinct growth dynamics (molecular beam epitaxy, conserved KPZ, quenched-disorder KPZ) as anomalous with 100% detection at system sizes L=128–512. Using rigorous bootstrap uncertainty quantification (n=1000 iterations), we extract a universality distance D_ML(κ) with crossover scale κ_c = 0.876 [95% CI: 0.807, 0.938] and sharpness γ = 1.537 [1.326, 1.775]. The method achieves a false positive rate of 5% [2%, 9%], comparable to the Isolation Forest contamination parameter (5%). Feature ablation reveals that gradient statistics achieve 100% detection alone, while traditional scaling exponents (α, β) achieve only 79%—suggesting that local derivative statistics encode universality more robustly than global exponent estimation at finite size. We validate this interpretation by demonstrating 100% detection of ballistic deposition (BD), which shares the same roughness exponent (α ≈ 0.5) as the training classes but exhibits distinct gradient statistics, with separation ranging from 189σ (spectral features) to 12,591σ (gradient features).
+I demonstrate that unsupervised anomaly detection provides a quantitative, continuous metric of universality class proximity directly from finite-size simulation data without fitting scaling exponents. An Isolation Forest trained on Edwards-Wilkinson and Kardar-Parisi-Zhang surfaces identifies distinct growth dynamics (molecular beam epitaxy, conserved KPZ, quenched-disorder KPZ) as anomalous with 100% detection at system sizes L=128–512. Using rigorous bootstrap uncertainty quantification (n=1000 iterations), I extract a universality distance D_ML(κ) with crossover scale κ_c = 0.876 [95% CI: 0.807, 0.938] and sharpness γ = 1.537 [1.326, 1.775]. The method achieves a false positive rate of 5% [2%, 9%], comparable to the Isolation Forest contamination parameter (5%). Feature ablation reveals that gradient statistics achieve 100% detection alone, while traditional scaling exponents (α, β) achieve only 79%—suggesting that local derivative statistics encode universality more robustly than global exponent estimation at finite size. I validate this interpretation by demonstrating 100% detection of ballistic deposition (BD), which shares the same roughness exponent (α ≈ 0.5) as the training classes but exhibits distinct gradient statistics, with separation ranging from 189σ (spectral features) to 12,591σ (gradient features).
 
 **Keywords:** universality classes, anomaly detection, machine learning, surface growth, gradient statistics
 
@@ -25,11 +25,11 @@ Traditional identification of universality class membership relies on fitting sc
 3. **Crossover regimes**: Systems interpolating between universality classes yield ambiguous exponents
 4. **Unknown dynamics**: Supervised classification requires knowing all classes in advance
 
-These limitations motivate an alternative approach: can we quantify universality class membership without fitting scaling exponents?
+These limitations motivate an alternative approach: can I quantify universality class membership without fitting scaling exponents?
 
 ### 1.2 Approach
 
-We propose an unsupervised anomaly detection framework where:
+I propose an unsupervised anomaly detection framework where:
 
 1. An Isolation Forest [5] learns the feature distribution of known universality classes (EW and KPZ)
 2. Test surfaces are scored by their deviation from this learned manifold
@@ -100,7 +100,7 @@ The biharmonic coefficient κ interpolates continuously between KPZ (κ=0) and M
 
 ### 2.2 Feature Extraction
 
-We extract a 16-dimensional feature vector from each surface trajectory h(x,t):
+I extract a 16-dimensional feature vector from each surface trajectory h(x,t):
 
 | Group | Features | Description |
 |-------|----------|-------------|
@@ -115,7 +115,7 @@ Features are computed from the full trajectory, not just the final surface, capt
 
 ### 2.3 Anomaly Detection
 
-We train an Isolation Forest [5] on feature vectors from EW and KPZ surfaces. Isolation Forest identifies anomalies by measuring how quickly data points can be isolated through random partitioning—anomalous points require fewer splits.
+I train an Isolation Forest [5] on feature vectors from EW and KPZ surfaces. Isolation Forest identifies anomalies by measuring how quickly data points can be isolated through random partitioning—anomalous points require fewer splits.
 
 **Training**: 50 samples each of EW and KPZ at L=128, T=200
 **Contamination**: 0.05 (expected anomaly rate in training data)
@@ -123,7 +123,7 @@ We train an Isolation Forest [5] on feature vectors from EW and KPZ surfaces. Is
 
 ### 2.4 Universality Distance
 
-We define the universality distance D_ML by normalizing the raw anomaly score:
+I define the universality distance D_ML by normalizing the raw anomaly score:
 
 D_ML(κ) = [s(κ=0) - s(κ)] / [s(κ=0) - s(κ→∞)]
 
@@ -132,7 +132,7 @@ where s(κ=0) is the KPZ baseline score and s(κ→∞) is the asymptotic MBE sc
 - D_ML = 0 for pure KPZ (κ=0)
 - D_ML → 1 for MBE-dominated dynamics (large κ)
 
-We fit the functional form:
+I fit the functional form:
 
 D_ML(κ) = κ^γ / (κ^γ + κ_c^γ)
 
@@ -177,7 +177,7 @@ The monotonic increase of D_ML from 0 (pure KPZ) to 1 (MBE-like) demonstrates th
 
 Figure 3 compares D_ML with traditional scaling exponent estimation in the crossover regime (κ ∈ [0.5, 2.0]).
 
-We systematically compared three anomaly detection methods:
+I systematically compared three anomaly detection methods:
 
 | Method | False Positive Rate | Configuration |
 |--------|--------------------:|---------------|
@@ -213,7 +213,7 @@ Table 2 shows detection rates when using only a single feature group.
 
 ### 3.5 Similar-Exponent Test: Ballistic Deposition
 
-To validate that the detector recognizes morphological signatures rather than merely distinguishing scaling exponents, we tested ballistic deposition (BD)—a discrete growth model with α ≈ 0.5, matching the training classes (EW and KPZ both have α = 0.5).
+To validate that the detector recognizes morphological signatures rather than merely distinguishing scaling exponents, I tested ballistic deposition (BD)—a discrete growth model with α ≈ 0.5, matching the training classes (EW and KPZ both have α = 0.5).
 
 **Results:**
 - **Detection rate: 100%** (50/50 BD surfaces classified as anomalous)
@@ -277,7 +277,7 @@ This approach may be useful for:
 
 ## 5. Conclusion
 
-We have demonstrated that unsupervised anomaly detection provides a quantitative universality distance D_ML that characterizes proximity to known universality classes directly from finite-size surface data. The key results are:
+I have demonstrated that unsupervised anomaly detection provides a quantitative universality distance D_ML that characterizes proximity to known universality classes directly from finite-size surface data. The key results are:
 
 1. **Rigorous uncertainty quantification**: Bootstrap analysis (n=1000) yields κ_c = 0.876 [0.807, 0.938] and γ = 1.537 [1.326, 1.775], demonstrating robustness
 

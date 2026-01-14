@@ -40,7 +40,7 @@ where $w$ is the interface width, $L$ is the system size, and $z = \alpha/\beta$
 
 First, reliable exponent estimation requires large systems approaching the asymptotic scaling regime. For KPZ in 1+1 dimensions, theoretical values are $\alpha = 1/2$, $\beta = 1/3$, $z = 3/2$~\cite{KPZ1986}, but finite-size corrections can persist to surprisingly large system sizes~\cite{Corwin2012}. Second, growth exponents require access to the pre-saturation regime, which may be short-lived or contaminated by transients. Third, systems interpolating between universality classes yield ambiguous exponents in crossover regimes. Fourth, supervised classification requires knowing all possible classes in advance---a fundamental limitation for discovery.
 
-These limitations motivate an alternative question: can we quantify universality class membership without fitting scaling exponents?
+These limitations motivate an alternative question: can I quantify universality class membership without fitting scaling exponents?
 
 Recent applications of machine learning to statistical physics have demonstrated remarkable success in detecting phase transitions~\cite{Carrasquilla2017,vanNieuwenburg2017} and mapping phase diagrams~\cite{Kottmann2021,Liu2023}. However, most approaches rely on supervised learning, requiring labeled training data from all phases of interest. Unsupervised methods, particularly anomaly detection, offer an alternative paradigm where the goal is to identify when data deviates from a learned ``normal'' distribution---without specifying in advance what form anomalies might take.
 

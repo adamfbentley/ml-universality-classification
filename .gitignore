@@ -48,6 +48,9 @@ Thumbs.db
 /data/raw/
 /data/processed/
 
+# Papers (keep private)
+arxiv/
+
 # Jupyter Notebooks
 .ipynb_checkpoints/
 *-checkpoint.ipynb

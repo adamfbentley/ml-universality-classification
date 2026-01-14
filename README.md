@@ -18,11 +18,13 @@ An unsupervised anomaly detection approach that provides a continuous, quantitat
 
 We define a **universality distance D_ML(κ)** that quantifies proximity to the KPZ universality class:
 
-| Parameter | Value |
-|-----------|-------|
-| Crossover scale κ_c | 0.76 ± 0.05 |
-| Sharpness γ | 1.51 ± 0.16 |
-| Fit quality R² | 0.964 |
+| Parameter | Value | 95% CI |
+|-----------|-------|--------|
+| Crossover scale κ_c | 0.876 | [0.807, 0.938] |
+| Sharpness γ | 1.537 | [1.326, 1.775] |
+| Fit quality R² | 0.964 | — |
+
+Bootstrap uncertainty quantification (n=1000 iterations) demonstrates robustness to sample selection.
 
 In crossover regimes, D_ML provides **~2× better signal-to-noise** than traditional exponent fitting (SNR 3.4× vs 1.6-1.8×).
 
@@ -46,10 +48,20 @@ This project demonstrates that unsupervised anomaly detection can:
 Sweeping the biharmonic coefficient κ from pure KPZ (κ=0) to MBE-dominated dynamics (large κ):
 
 - D_ML is **continuous and monotonic**
-- Crossover scale κ_c = 0.76 extracted purely from data
+- Crossover scale κ_c = 0.876 [0.807, 0.938] extracted purely from data
 - Well-described by saturation curve: D_ML = κ^γ / (κ^γ + κ_c^γ)
 
-### 2. Comparison with Exponent Fitting
+### 2. Method Comparison
+
+| Method | False Positive Rate |
+|--------|---------------------|
+| **Isolation Forest** | **3%** |
+| Local Outlier Factor | 4% |
+| One-Class SVM | 34% |
+
+Isolation Forest provides optimal anomaly detection for this geometry.
+
+### 3. Comparison with Exponent Fitting
 
 | Method | SNR in Crossover Region |
 |--------|-------------------------|
@@ -59,7 +71,21 @@ Sweeping the biharmonic coefficient κ from pure KPZ (κ=0) to MBE-dominated dyn
 
 At L=128, traditional exponent fits yield α ≈ 0.24, β ≈ 0 (far from theoretical KPZ values), while D_ML cleanly tracks the crossover.
 
-### 3. Cross-Scale Robustness
+### 4. Ballistic Deposition Test
+
+A critical validation using a model with **identical asymptotic exponent** (α ≈ 0.5) as EW and KPZ:
+
+| Feature Type | Cohen's d Separation |
+|--------------|---------------------|
+| **Gradient** | **12,591σ** |
+| Morphological | 3,186σ |
+| Temporal | 2,047σ |
+| Spectral | 189σ |
+| Scaling exponents | 0.43σ |
+
+This proves the detector learns **morphological signatures of growth dynamics**, not merely fitted exponents.
+
+### 5. Cross-Scale Robustness
 
 | System Size | False Positive Rate | Unknown Class Detection |
 |-------------|---------------------|------------------------|
@@ -69,7 +95,7 @@ At L=128, traditional exponent fits yield α ≈ 0.24, β ≈ 0 (far from theore
 
 Train at L=128, test at L=512: detection holds, FPR improves.
 
-### 4. Feature Ablation
+### 6. Feature Ablation
 
 | Feature Group | Detection Rate |
 |---------------|----------------|
@@ -92,10 +118,14 @@ See [PAPER_DRAFT.md](PAPER_DRAFT.md) for the full writeup.
 src/
 ├── physics_simulation.py      # EW, KPZ surface generators
 ├── extended_physics.py        # MBE, VLDS, Quenched-KPZ generators
+├── additional_surfaces.py     # Additional surface generators
 ├── feature_extraction.py      # 16-feature extraction
 ├── anomaly_detection.py       # Isolation Forest wrapper
 ├── universality_distance.py   # D_ML(κ) computation [MAIN RESULT]
 ├── exponent_comparison.py     # α,β vs D_ML comparison
+├── bootstrap_uncertainty.py   # Bootstrap CI analysis (n=1000)
+├── method_comparison_fast.py  # IF vs LOF vs SVM comparison
+├── test_ballistic_deposition.py # BD validation (12,591σ test)
 ├── generate_figures.py        # Publication figures
 └── results/                   # Data and figures
 ```

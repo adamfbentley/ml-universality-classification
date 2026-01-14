@@ -1,0 +1,122 @@
+{
+  "isolation_forest": {
+    "detection_rates": {
+      "MBE": 1.0,
+      "VLDS": 0.9992,
+      "Q-KPZ": 1.0
+    },
+    "detection_cis": {
+      "MBE": [
+        1.0,
+        1.0
+      ],
+      "VLDS": [
+        1.0,
+        1.0
+      ],
+      "Q-KPZ": [
+        1.0,
+        1.0
+      ]
+    },
+    "fpr_known": {
+      "EW": 0.0216,
+      "KPZ": 0.0352
+    },
+    "fpr_cis": {
+      "EW": [
+        0.0,
+        0.1
+      ],
+      "KPZ": [
+        0.0,
+        0.13549999999999998
+      ]
+    },
+    "combined_fpr": 0.0284,
+    "combined_fpr_ci": [
+      0.0,
+      0.08
+    ]
+  },
+  "one_class_svm": {
+    "detection_rates": {
+      "MBE": 1.0,
+      "VLDS": 1.0,
+      "Q-KPZ": 1.0
+    },
+    "detection_cis": {
+      "MBE": [
+        1.0,
+        1.0
+      ],
+      "VLDS": [
+        1.0,
+        1.0
+      ],
+      "Q-KPZ": [
+        1.0,
+        1.0
+      ]
+    },
+    "fpr_known": {
+      "EW": 0.3044,
+      "KPZ": 0.3688
+    },
+    "fpr_cis": {
+      "EW": [
+        0.14,
+        0.46
+      ],
+      "KPZ": [
+        0.169,
+        0.54
+      ]
+    },
+    "combined_fpr": 0.33659999999999995,
+    "combined_fpr_ci": [
+      0.1935,
+      0.45775
+    ]
+  },
+  "lof": {
+    "detection_rates": {
+      "MBE": 1.0,
+      "VLDS": 1.0,
+      "Q-KPZ": 1.0
+    },
+    "detection_cis": {
+      "MBE": [
+        1.0,
+        1.0
+      ],
+      "VLDS": [
+        1.0,
+        1.0
+      ],
+      "Q-KPZ": [
+        1.0,
+        1.0
+      ]
+    },
+    "fpr_known": {
+      "EW": 0.012400000000000001,
+      "KPZ": 0.0776
+    },
+    "fpr_cis": {
+      "EW": [
+        0.0,
+        0.06
+      ],
+      "KPZ": [
+        0.0,
+        0.18
+      ]
+    },
+    "combined_fpr": 0.045,
+    "combined_fpr_ci": [
+      0.002250000000000001,
+      0.09
+    ]
+  }
+}

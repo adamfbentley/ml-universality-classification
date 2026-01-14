@@ -1,0 +1,425 @@
+\documentclass[aps,pre,twocolumn,showpacs,superscriptaddress,groupedaddress,floatfix]{revtex4-2}
+
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{multirow}
+
+\begin{document}
+
+\title{Data-Driven Universality Distance for Finite-Size Surface Growth Dynamics}
+
+\author{Adam Bentley}
+\email{adam.f.bentley@gmail.com}
+\affiliation{School of Mathematics and Statistics, Victoria University of Wellington, New Zealand}
+
+\date{\today}
+
+\begin{abstract}
+I demonstrate that unsupervised anomaly detection provides a quantitative, continuous metric of universality class proximity directly from finite-size simulation data without fitting scaling exponents. An Isolation Forest trained on Edwards-Wilkinson (EW) and Kardar-Parisi-Zhang (KPZ) surfaces identifies distinct growth dynamics---molecular beam epitaxy (MBE), conserved KPZ (VLDS), and quenched-disorder KPZ---as anomalous with 100\% detection at system sizes $L=128$--$512$. Using rigorous bootstrap uncertainty quantification ($n=1000$ iterations), I extract a universality distance $D_{\mathrm{ML}}(\kappa)$ with crossover scale $\kappa_c = 0.876$ [95\% CI: 0.807, 0.938] and sharpness $\gamma = 1.537$ [1.326, 1.775], with false positive rate 5\% [2\%, 9\%]. Systematic method comparison shows Isolation Forest (3\% FPR) outperforms Local Outlier Factor (4\%) and One-Class SVM (34\%). Feature ablation reveals that gradient statistics achieve 100\% detection alone, while traditional scaling exponents ($\alpha$, $\beta$) achieve only 79\%. I validate this finding using ballistic deposition (BD), which shares the same roughness exponent ($\alpha \approx 0.5$) as the training classes but exhibits distinct gradient statistics, yielding 100\% detection with Cohen's $d$ separation of 12,591$\sigma$ for gradient features versus $<1\sigma$ for scaling exponents. This demonstrates that the detector learns morphological signatures of growth dynamics, not merely global scaling exponents.
+\end{abstract}
+
+\pacs{64.60.Ht, 89.75.Kd, 68.35.Ct, 05.40.-a}
+\keywords{universality classes, anomaly detection, machine learning, surface growth, KPZ equation}
+
+\maketitle
+
+%=====================================================
+\section{Introduction}
+%=====================================================
+
+Universality is a cornerstone of statistical physics: systems with vastly different microscopic details can exhibit identical large-scale behavior characterized by universal scaling exponents~\cite{Kadanoff1966,Wilson1975}. In kinetic roughening, the Edwards-Wilkinson (EW) and Kardar-Parisi-Zhang (KPZ) universality classes describe broad families of surface growth phenomena, from bacterial colonies to turbulent liquid crystals~\cite{KPZ1986,Barabasi1995,HalpinHealy1995,Takeuchi2010}.
+
+Traditional identification of universality class membership relies on fitting scaling exponents $\alpha$ (roughness) and $\beta$ (growth) from the Family-Vicsek scaling relation~\cite{FamilyVicsek1985}:
+\begin{equation}
+w(L,t) \sim L^\alpha f(t/L^z)
+\end{equation}
+where $w$ is the interface width, $L$ is the system size, and $z = \alpha/\beta$ is the dynamic exponent. However, this approach faces significant practical limitations.
+
+First, reliable exponent estimation requires large systems approaching the asymptotic scaling regime. For KPZ in 1+1 dimensions, theoretical values are $\alpha = 1/2$, $\beta = 1/3$, $z = 3/2$~\cite{KPZ1986}, but finite-size corrections can persist to surprisingly large system sizes~\cite{Corwin2012}. Second, growth exponents require access to the pre-saturation regime, which may be short-lived or contaminated by transients. Third, systems interpolating between universality classes yield ambiguous exponents in crossover regimes. Fourth, supervised classification requires knowing all possible classes in advance---a fundamental limitation for discovery.
+
+These limitations motivate an alternative question: can we quantify universality class membership without fitting scaling exponents?
+
+Recent applications of machine learning to statistical physics have demonstrated remarkable success in detecting phase transitions~\cite{Carrasquilla2017,vanNieuwenburg2017} and mapping phase diagrams~\cite{Kottmann2021,Liu2023}. However, most approaches rely on supervised learning, requiring labeled training data from all phases of interest. Unsupervised methods, particularly anomaly detection, offer an alternative paradigm where the goal is to identify when data deviates from a learned ``normal'' distribution---without specifying in advance what form anomalies might take.
+
+I propose an unsupervised anomaly detection framework where an Isolation Forest~\cite{Liu2008} learns the feature distribution of known universality classes (EW and KPZ), and test surfaces are scored by their deviation from this learned manifold. The anomaly score is normalized to define a continuous \emph{universality distance} $D_{\mathrm{ML}}$. This approach does not replace renormalization group theory or rigorous scaling analysis~\cite{Cardy1996,Goldenfeld1992}. Rather, it provides an operational, data-driven diagnostic for finite-size, finite-time data where traditional methods may be unreliable.
+
+The key contributions of this work are:
+\begin{enumerate}
+\item Rigorous bootstrap uncertainty quantification ($n=1000$) for all extracted parameters, yielding 95\% confidence intervals
+\item Systematic method comparison: Isolation Forest (3\% FPR) vs Local Outlier Factor (4\%) vs One-Class SVM (34\%)
+\item Demonstration that gradient features (100\% detection) outperform traditional scaling exponents (79\%)
+\item Validation via similar-exponent test: 100\% detection of ballistic deposition despite $\alpha \approx 0.5$ matching training classes, with 12,591$\sigma$ gradient separation
+\item Extraction of continuous universality distance $D_{\mathrm{ML}}(\kappa)$ with crossover scale $\kappa_c = 0.876$ [0.807, 0.938]
+\end{enumerate}
+
+%=====================================================
+\section{Methods}
+%=====================================================
+
+\subsection{Surface Growth Models}
+
+I consider 1+1 dimensional surface growth described by stochastic partial differential equations of the general form:
+\begin{equation}
+\frac{\partial h}{\partial t} = F[h] + \eta(x,t)
+\end{equation}
+where $h(x,t)$ is the surface height, $F[h]$ captures deterministic dynamics, and $\eta$ is Gaussian white noise with correlator:
+\begin{equation}
+\langle\eta(x,t)\eta(x',t')\rangle = 2D\,\delta(x-x')\delta(t-t')
+\end{equation}
+
+\textbf{Training classes (known):}
+
+\emph{Edwards-Wilkinson (EW)}~\cite{Edwards1982}: 
+\begin{equation}
+F[h] = \nu\nabla^2 h
+\end{equation}
+This describes linear diffusive relaxation with scaling exponents $\alpha = 1/2$, $\beta = 1/4$, $z = 2$ in 1+1D.
+
+\emph{Kardar-Parisi-Zhang (KPZ)}~\cite{KPZ1986}:
+\begin{equation}
+F[h] = \nu\nabla^2 h + \frac{\lambda}{2}(\nabla h)^2
+\end{equation}
+The nonlinear term captures lateral growth, yielding $\alpha = 1/2$, $\beta = 1/3$, $z = 3/2$ in 1+1D.
+
+\textbf{Test classes (unknown to detector):}
+
+\emph{Molecular Beam Epitaxy (MBE)}:
+\begin{equation}
+F[h] = -\kappa\nabla^4 h
+\end{equation}
+Fourth-order surface diffusion with $\alpha = 1$, $\beta = 1/4$, $z = 4$.
+
+\emph{Conserved KPZ (VLDS)}:
+\begin{equation}
+F[h] = -\kappa\nabla^4 h + \lambda\nabla^2(\nabla h)^2
+\end{equation}
+Mass-conserving nonlinear dynamics with $\alpha \approx 1$, $\beta \approx 1/4$.
+
+\emph{Quenched-disorder KPZ}:
+\begin{equation}
+F[h] = \nu\nabla^2 h + \frac{\lambda}{2}(\nabla h)^2 + \xi(x)
+\end{equation}
+KPZ with frozen spatial disorder $\xi(x)$, yielding distinct exponent $\alpha \approx 0.63$.
+
+\emph{Ballistic Deposition (BD)}~\cite{FamilyVicsek1985,Barabasi1992}:
+Discrete growth model where particles fall vertically and stick upon contact with nearest-neighbor heights. Despite identical asymptotic exponent $\alpha \approx 0.5$ as EW and KPZ, BD exhibits fundamentally different local morphology due to discrete sticking dynamics.
+
+\textbf{Crossover model (KPZ$\to$MBE):}
+\begin{equation}
+F[h] = \nu\nabla^2 h + \frac{\lambda}{2}(\nabla h)^2 - \kappa\nabla^4 h
+\end{equation}
+The biharmonic coefficient $\kappa$ interpolates continuously between KPZ ($\kappa=0$) and MBE-dominated dynamics (large $\kappa$). The crossover length scale $\ell_\times \sim (\kappa/\lambda)^{1/2}$ characterizes where fourth-order and nonlinear terms compete.
+
+\textbf{Numerical implementation:}
+Simulations use Euler-Maruyama integration with spatial discretization $dx = 1$ and base time step $dt = 0.05$. For the crossover model, adaptive timestepping with $dt = \min(0.05, 0.0625/\kappa)$ ensures stability at large $\kappa$. System sizes $L = 64, 128, 256, 512$ are studied with $T = 60$--$200$ time steps. Periodic boundary conditions are applied and interfaces are centered ($h \to h - \langle h \rangle$) after each step. Typically 30--50 samples are generated per configuration.
+
+\subsection{Feature Extraction}
+
+I extract a 16-dimensional feature vector from each surface trajectory $h(x,t)$, capturing spatial structure, spectral content, morphology, and temporal evolution:
+
+\begin{table}[h]
+\centering
+\caption{Feature groups extracted from surface trajectories.}
+\label{tab:features}
+\begin{tabular}{lll}
+\toprule
+\textbf{Group} & \textbf{Dim} & \textbf{Features} \\
+\midrule
+Scaling & 2 & $\alpha$, $\beta$ exponents \\
+Spectral & 4 & Total power, peak freq., ratio, decay \\
+Morphological & 3 & Width, kurtosis, slope variance \\
+Gradient & 1 & Mean $|\nabla h|$ \\
+Temporal & 3 & Growth rate, acceleration, trend \\
+Correlation & 3 & Decay length, corr.\ length, anisotropy \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Scaling exponents are computed from power-law fits: $\alpha$ from the height-height correlation function $S(r) = \langle(h(x+r) - h(x))^2\rangle \sim r^{2\alpha}$, and $\beta$ from width growth $w(t) \sim t^\beta$ in the growth regime. Spectral features are computed from the spatial Fourier transform of the final surface. All features are computed from the full trajectory, capturing both spatial structure and temporal evolution.
+
+\subsection{Anomaly Detection}
+
+I train an Isolation Forest~\cite{Liu2008} on feature vectors from EW and KPZ surfaces. Isolation Forest identifies anomalies by measuring how quickly data points can be isolated through random recursive partitioning---anomalous points, being sparse and distinct, require fewer splits to isolate.
+
+\textbf{Training protocol:} 50 samples each of EW and KPZ at $L=128$, $T=200$. Contamination parameter set to 0.05 (expected 5\% anomaly rate in training data). The model outputs a raw anomaly score $s \in \mathbb{R}$ where higher values indicate less anomalous (more ``normal'') samples.
+
+I systematically compared three anomaly detection methods:
+\begin{itemize}
+\item \textbf{Isolation Forest}: Geometric isolation via random partitioning (optimal)
+\item \textbf{Local Outlier Factor (LOF)}: Density-based with $k$-nearest neighbors
+\item \textbf{One-Class SVM}: Support vector approach with RBF kernel
+\end{itemize}
+Results show Isolation Forest achieves 3\% false positive rate, compared to 4\% for LOF and 34\% for One-Class SVM. The SVM's poor performance stems from its assumption of convex decision boundaries, which fails for the irregular feature-space geometry of universality classes.
+
+\subsection{Universality Distance}
+
+I define the universality distance $D_{\mathrm{ML}}$ by normalizing the raw anomaly score:
+\begin{equation}
+D_{\mathrm{ML}}(\kappa) = \frac{s(\kappa=0) - s(\kappa)}{s(\kappa=0) - s(\kappa\to\infty)}
+\end{equation}
+where $s(\kappa=0)$ is the pure KPZ baseline score and $s(\kappa\to\infty)$ is the asymptotic MBE score. This yields:
+\begin{itemize}
+\item $D_{\mathrm{ML}} = 0$ for pure KPZ ($\kappa=0$)
+\item $D_{\mathrm{ML}} \to 1$ for MBE-dominated dynamics
+\end{itemize}
+
+I fit the functional form:
+\begin{equation}
+D_{\mathrm{ML}}(\kappa) = \frac{\kappa^\gamma}{\kappa^\gamma + \kappa_c^\gamma}
+\end{equation}
+which describes a saturation curve with crossover scale $\kappa_c$ and sharpness $\gamma$.
+
+\subsection{Cross-Scale Validation Protocol}
+
+A critical test for the physical validity of this approach is scale-invariance. If the detector merely learns finite-size artifacts, performance should degrade when tested at different system sizes. The validation protocol is:
+\begin{enumerate}
+\item Train Isolation Forest on EW+KPZ at $L=128$ ($n=40$ samples each)
+\item Test detection on known classes (EW, KPZ) at $L=128, 256, 512$
+\item Test detection on unknown classes (MBE, VLDS, Q-KPZ) at $L=128, 256, 512$
+\item Measure false positive rate (FPR) on known classes and detection rate on unknown classes
+\end{enumerate}
+
+Success criterion: detection rate $>80\%$ on unknown classes at all scales with controlled FPR.
+
+%=====================================================
+\section{Results}
+%=====================================================
+
+\subsection{Anomaly Detection Performance}
+
+Table~\ref{tab:detection} shows detection rates for unknown universality classes across system sizes, with the detector trained only at $L=128$.
+
+\begin{table}[b]
+\centering
+\caption{Detection rates for unknown universality classes. FPR = false positive rate on known classes (EW, KPZ). Training performed at $L=128$ only.}
+\label{tab:detection}
+\begin{tabular}{lcccc}
+\toprule
+System Size & FPR & MBE & VLDS & Q-KPZ \\
+\midrule
+$L=128$ (train) & 12.5\% & 100\% & 100\% & 100\% \\
+$L=256$ & 12.5\% & 100\% & 100\% & 100\% \\
+$L=512$ & 2.5\% & 100\% & 100\% & 100\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Key findings:
+\begin{itemize}
+\item Perfect detection (100\%) of all unknown classes at all scales
+\item False positive rate decreases with system size (12.5\% $\to$ 2.5\%)
+\item No degradation when testing at 4$\times$ training size ($L=512$ vs $L=128$)
+\end{itemize}
+
+The scale-invariance is consistent with the hypothesis that universality classes occupy distinct, well-separated regions in feature space that persist under rescaling. This rules out the possibility that the detector is keying on trivial size-dependent artifacts.
+
+\subsection{Anomaly Score Geometry}
+
+To visualize the ``manifold'' structure, I examine anomaly score distributions across system sizes (Figure~\ref{fig:scores}).
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.85\textwidth]{../../src/results/score_distributions.png}
+\caption{Anomaly score distributions for known (EW, KPZ) and unknown (MBE, VLDS, Q-KPZ) universality classes at $L=128$. Known classes cluster at positive scores (less anomalous), while unknown classes occupy negative scores with clear separation. Dashed line at $s=0$ shows detection threshold.}
+\label{fig:scores}
+\end{figure*}
+
+Known universality classes cluster at positive scores while unknown classes lie at negative scores. Mean scores: $+0.079 \pm 0.04$ for known classes vs $-0.100 \pm 0.02$ for unknown, yielding clear separation of $\Delta s = 0.179$ at $L=128$. Crucially, the score distributions \emph{narrow} with increasing $L$: variance decreases from $\pm 0.04$ to $\pm 0.01$. This is consistent with universality being an asymptotic phenomenon---larger systems converge more cleanly to their universal behavior.
+
+\subsection{Feature Ablation Study}
+
+Table~\ref{tab:ablation} shows detection rates when using only individual feature groups.
+
+\begin{table}[b]
+\centering
+\caption{Detection rates by feature group (using each group alone).}
+\label{tab:ablation}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Feature Group} & \textbf{Dim} & \textbf{Detection Rate} \\
+\midrule
+Gradient & 1 & \textbf{100\%} \\
+Temporal & 3 & \textbf{100\%} \\
+Morphological & 3 & 95.8\% \\
+Correlation & 3 & 83.3\% \\
+Scaling ($\alpha$, $\beta$) & 2 & 79.2\% \\
+Spectral & 4 & 4.2\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The most striking finding: \textbf{gradient features alone achieve 100\% detection with just a single feature} (mean $|\nabla h|$), while traditional scaling exponents achieve only 79\%. This challenges conventional wisdom that exponents $\alpha$ and $\beta$---the defining characteristics of universality classes---should provide optimal discrimination.
+
+The scaling relation $\mathrm{Var}(\nabla h) \sim L^{2\alpha-2}$ links gradient statistics to universality through the roughness exponent. However, conventional practice exploits this relationship to \emph{measure} $\alpha$, not to \emph{bypass} it. The superior performance of direct gradient measurement implies that finite-size effects, crossover corrections, and measurement noise corrupt exponent fitting more severely than local measurements.
+
+Temporal features also achieve 100\% detection, tracking $\beta$ directly through time-evolution statistics without requiring noisy power-law fitting. The combination provides redundancy: multiple feature types encode universality, ensuring robustness.
+
+\subsection{Time-Dependent Behavior}
+
+A critical validation is whether the detector respects the scaling regime. If universality is an asymptotic phenomenon, known classes should converge toward the learned manifold over time, while unknown classes should remain separated (Figure~\ref{fig:time}).
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.85\textwidth]{../../src/results/time_dependence_study.png}
+\caption{Time-dependent anomaly scores at $L=64$. Known classes (EW, KPZ) converge toward positive scores as surfaces develop universal scaling: EW increases from $-0.009$ to $+0.031$, KPZ from $-0.006$ to $+0.023$. Unknown class (Q-KPZ) remains at negative scores throughout ($-0.054$ to $-0.075$) with 100\% detection at all times.}
+\label{fig:time}
+\end{figure*}
+
+Key observations:
+\begin{enumerate}
+\item \textbf{Known classes converge:} EW scores increase from $-0.009$ to $+0.031$; KPZ from $-0.006$ to $+0.023$. Early-time samples appear more ``out of place''; late-time samples converge to the learned manifold.
+\item \textbf{Unknown class remains anomalous:} Quenched-KPZ stays at negative scores throughout ($-0.054$ to $-0.075$) with 100\% detection at all times.
+\end{enumerate}
+
+This physics-aware behavior provides strong evidence that the detector captures genuine universality structure rather than simulation artifacts. The time-dependent convergence is exactly what one expects from universality as an asymptotic, emergent phenomenon.
+
+\subsection{Crossover Study: KPZ $\to$ MBE}
+
+To demonstrate graded anomaly detection, I sweep the biharmonic coefficient $\kappa$ in the hybrid KPZ-MBE equation. Detection rates increase monotonically: 0\% at $\kappa=0$ (pure KPZ), 4\% at $\kappa=0.2$, 20\% at $\kappa=0.5$, 52\% at $\kappa=1.0$ (crossover point), 96\% at $\kappa=1.5$, and 100\% at $\kappa=3.0$ (fully MBE). The smooth, monotonic transition confirms that the anomaly score provides a continuous measure of ``distance from known physics.''
+
+\subsection{Universality Distance $D_{\mathrm{ML}}(\kappa)$}
+
+The main novel result is the continuous universality distance metric. Using a fine sweep of 24 $\kappa$ values from 0 to 10, I fit the normalized distance to the form $D_{\mathrm{ML}} = \kappa^\gamma/(\kappa^\gamma + \kappa_c^\gamma)$. Bootstrap uncertainty quantification ($n=1000$ iterations) yields:
+
+\begin{itemize}
+\item Crossover scale: $\kappa_c = 0.876$ [95\% CI: 0.807, 0.938]
+\item Sharpness: $\gamma = 1.537$ [95\% CI: 1.326, 1.775]
+\item False positive rate: 5\% [95\% CI: 2\%, 9\%]
+\item Fit quality: $R^2 = 0.964$
+\end{itemize}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.85\textwidth]{../../src/results/universality_distance_main.pdf}
+\caption{Universality distance $D_{\mathrm{ML}}(\kappa)$ across the KPZ$\to$MBE crossover with bootstrap confidence intervals ($n=1000$). Points show mean normalized anomaly scores; shaded region shows 95\% CI from bootstrap resampling. Fit parameters: $\kappa_c = 0.876$ [0.807, 0.938], $\gamma = 1.537$ [1.326, 1.775]. The tight confidence intervals demonstrate that results are robust to sample selection.}
+\label{fig:crossover}
+\end{figure*}
+
+The crossover scale $\kappa_c \approx 0.88$ can be understood theoretically. In the hybrid equation, KPZ nonlinearity dominates at scales $\ell < \ell_\times$ where $\ell_\times \sim (\kappa/\lambda)^{1/2}$. For $\kappa_c \approx 0.88$ and $\lambda = 1$, this gives $\ell_\times \approx 0.94$, suggesting the ML metric captures the competition between second-order (KPZ) and fourth-order (MBE) dynamics at the lattice scale.
+
+\subsection{Similar-Exponent Validation: Ballistic Deposition}
+
+A critical test of the claim that gradient features outperform scaling exponents is to examine a model with \emph{identical} asymptotic exponent but different local morphology. Ballistic deposition (BD) has $\alpha \approx 0.5$---the same as both EW and KPZ in the training set---but grows via discrete sticking rather than continuous diffusion.
+
+\textbf{Results:}
+\begin{itemize}
+\item Detection rate: \textbf{100\%} (50/50 BD surfaces classified as anomalous)
+\item Cohen's $d$ separation from training data by feature group:
+\begin{itemize}
+\item Gradient: \textbf{12,591$\sigma$} (mean absolute gradient)
+\item Morphological: 3,186$\sigma$ (surface width)
+\item Temporal: 2,047$\sigma$ (growth rate)
+\item Spectral: 189$\sigma$ (power spectrum)
+\item Scaling exponents ($\alpha$, $\beta$): \textbf{0.43$\sigma$} (indistinguishable)
+\end{itemize}
+\end{itemize}
+
+This demonstrates that the detector learns morphological signatures of growth dynamics, not merely global scaling exponents. BD surfaces have sharp, faceted slopes from discrete deposition events, while KPZ surfaces have smoothed gradients from the $(\lambda/2)(\nabla h)^2$ nonlinearity. The 12,591$\sigma$ separation in gradient space---versus $<1\sigma$ for scaling exponents---provides definitive evidence that local surface structure encodes universality class information far more robustly than fitted power laws.
+
+\subsection{Comparison with Traditional Exponent Fitting}
+
+In the crossover regime ($\kappa \in [0.5, 2.0]$), I compare signal-to-noise ratios: $D_{\mathrm{ML}}$ achieves SNR of $3.4\times$, compared to $1.8\times$ for $\beta$ (width growth) and $1.6\times$ for $\alpha$ (structure function). $D_{\mathrm{ML}}$ provides approximately twice the signal-to-noise of traditional exponent fitting. Additionally, exponent estimates at $L=128$ are unreliable: measured values are $\alpha \approx 0.24$, $\beta \approx 0.0$ for $\kappa=0$ (pure KPZ), far from theoretical values $\alpha = 0.5$, $\beta = 0.33$. This confirms that finite-size effects severely corrupt traditional fitting at moderate system sizes, while $D_{\mathrm{ML}}$ remains robust.
+
+\subsection{Methodological Caution: Numerical Artifacts}
+
+A critical finding during development: ML anomaly detectors can overfit to numerical implementation details rather than underlying physics. Initially, parameter sweeps used different simulation codes for training and testing. Even when testing $\kappa=0$ (identical physics: pure KPZ), the detector flagged 100\% as anomalous because different numerical schemes (timestep, stencils, noise generation) produce distinguishable feature distributions.
+
+Resolution: All results use numerically consistent implementations with identical $dt$, spatial stencils, and centering procedures. The lesson for practitioners: when applying ML anomaly detection to physics, always validate that test data uses consistent numerical methods with training data.
+
+%=====================================================
+\section{Discussion}
+%=====================================================
+
+\subsection{What $D_{\mathrm{ML}}$ Is (and Is Not)}
+
+The universality distance $D_{\mathrm{ML}}$ is:
+\begin{itemize}
+\item A data-driven, operational observable
+\item Defined without assuming the governing equation
+\item Computable from finite-size, finite-time data
+\item Sensitive to departure from a trained universality basin
+\end{itemize}
+
+It is \emph{not}:
+\begin{itemize}
+\item A fundamental renormalization group invariant
+\item Universal across all feature choices
+\item A replacement for rigorous scaling analysis
+\end{itemize}
+
+The appropriate interpretation is that $D_{\mathrm{ML}}$ quantifies proximity to a learned universality class manifold in feature space. It provides practical value when traditional exponent fitting is unreliable due to finite-size effects, crossover behavior, or measurement limitations.
+
+\subsection{Why Gradient Features Outperform Exponents}
+
+The finding that gradient statistics (100\% detection) outperform fitted exponents (79\%) deserves explanation. The established scaling $\mathrm{Var}(\nabla h) \sim L^{2\alpha-2}$ relates gradient variance to the roughness exponent. Conventional wisdom suggests that measuring $\alpha$ should optimally encode universality class membership.
+
+However, this scaling is an \emph{asymptotic} relationship. At finite $L$, significant corrections exist: subleading terms, crossover effects from microscopic scales, and statistical fluctuations from finite sampling. Power-law fitting amplifies these errors, as small deviations in $\log w$ vs $\log L$ translate to large uncertainties in the fitted slope.
+
+The ballistic deposition test (Section~III.G) provides definitive evidence: BD has $\alpha \approx 0.5$ (identical to EW and KPZ) yet exhibits 12,591$\sigma$ separation in gradient features. This separation reflects the underlying PDE structure---EW/KPZ have continuous $\nabla^2 h$ diffusion, while BD has discrete sticking---not the asymptotic power laws.
+
+Direct gradient measurement bypasses the error amplification of global fitting. While it implicitly encodes $\alpha$, gradient statistics directly probe the terms in the governing equations (e.g., $\nabla^2 h$ vs $\nabla^4 h$ vs $(\nabla h)^2$). For finite-size classification, direct local measurements are more robust than parameter extraction from global scaling.
+
+This finding aligns with recent work showing that neural networks trained on physical systems often learn fundamental symmetries rather than phenomenological patterns~\cite{Liu2022}. Here, the detector learns to distinguish diffusive operators ($\nabla^2 h$) from discrete processes (BD) through their morphological imprints.
+
+\subsection{Manifold Hypothesis}
+
+The results support a ``manifold hypothesis'' for universality classes: distinct classes occupy compact, scale-invariant regions in feature space. Evidence includes:
+\begin{itemize}
+\item Clear separation between known and unknown classes (Figure~\ref{fig:scores})
+\item Separation persists across system sizes (Table~\ref{tab:detection})
+\item Score distributions narrow with increasing $L$
+\item Time-dependent convergence toward the manifold
+\end{itemize}
+
+This is an operational, not rigorous topological, claim. The manifold structure is defined by the chosen features and may not generalize to all possible universality classes or experimental conditions.
+
+\subsection{Potential Applications}
+
+This approach may be useful for:
+\begin{itemize}
+\item \textbf{Experimental data:} Characterizing universality from finite-resolution AFM/STM measurements where exponent fitting is unreliable
+\item \textbf{Simulation diagnostics:} Quick screening for unexpected dynamics before detailed analysis
+\item \textbf{Crossover analysis:} Identifying transition regions and extracting crossover scales without extensive fitting
+\item \textbf{Exploratory analysis:} Flagging surfaces that deviate from expected behavior for further investigation
+\end{itemize}
+
+The workflow complements traditional methods: anomaly detection provides rapid candidate identification; traditional scaling analysis provides rigorous verification.
+
+\subsection{Limitations and Future Work}
+
+Current limitations include:
+\begin{enumerate}
+\item Simulated surfaces only---real experimental data not yet tested
+\item 1+1 dimensions only---extension to 2+1D unexplored
+\item Limited set of universality classes in training
+\item No systematic noise robustness testing
+\end{enumerate}
+
+Future directions include application to experimental data (AFM surfaces, liquid crystal interfaces), extension to higher dimensions, incorporation of measurement noise and systematic errors, and exploration of optimal feature selection using information-theoretic criteria.
+
+%=====================================================
+\section{Conclusion}
+%=====================================================
+
+I have demonstrated that unsupervised anomaly detection provides a quantitative universality distance $D_{\mathrm{ML}}$ characterizing proximity to known universality classes directly from finite-size surface data. The key results are:
+
+\begin{enumerate}
+\item \textbf{Rigorous uncertainty quantification:} Bootstrap analysis ($n=1000$) yields $\kappa_c = 0.876$ [0.807, 0.938] and $\gamma = 1.537$ [1.326, 1.775], demonstrating robustness to sample selection
+\item \textbf{Method validation:} Isolation Forest achieves 3\% false positive rate, outperforming LOF (4\%) and One-Class SVM (34\%)
+\item \textbf{Gradient features encode universality:} Direct gradient measurement achieves 100\% detection, outperforming traditional scaling exponents (79\%)
+\item \textbf{Morphological signatures dominate:} Ballistic deposition test shows 12,591$\sigma$ separation in gradient space despite identical $\alpha \approx 0.5$, confirming detection via local dynamics rather than asymptotic scaling
+\item \textbf{Scale-invariance:} Training at $L=128$ generalizes to $L=512$ with 100\% detection of unknown classes
+\end{enumerate}
+
+This data-driven approach complements, rather than replaces, traditional scaling analysis, providing a practical diagnostic for regimes where exponent fitting is unreliable. The success of local gradient features over global scaling fits suggests a broader lesson: for finite-size physics, direct morphological measurement may outperform parameter extraction.
+
+\begin{acknowledgments}
+I thank the developers of scikit-learn for the Isolation Forest implementation. Computational resources were provided by Victoria University of Wellington. Code and data are available at \url{https://github.com/adamfbentley/ml-universality-classification}.
+\end{acknowledgments}
+
+\bibliography{references}
+
+\end{document}

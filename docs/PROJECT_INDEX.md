@@ -243,15 +243,9 @@ See `requirements.txt` for full list. Key packages:
 
 **Author:** A. Bentley  
 **Repository:** https://github.com/adamfbentley/ml-universality-classification  
-**Status:** Paper draft complete (December 2025)
-
-**Citation:**
-```
-Bentley, A. (2025). Data-driven universality distance for finite-size 
-surface growth dynamics. [preprint]
-```
+**Status:** Active research (December 2025)
 
 ---
 
 **Last Updated:** December 30, 2025  
-**Project Status:** ✅ Complete - Paper ready for submission
+**Project Status:** ✅ Core implementation complete

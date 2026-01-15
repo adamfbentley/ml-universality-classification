@@ -1,5 +1,6 @@
 # ML Universality Classification
 
+[![Tests](https://github.com/adamfbentley/ml-universality-classification/actions/workflows/tests.yml/badge.svg)](https://github.com/adamfbentley/ml-universality-classification/actions/workflows/tests.yml)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
@@ -178,7 +179,7 @@ The scaling relation `Var(∇h) ~ L^{2α-2}` links gradient statistics to univer
   author  = {Bentley, Adam},
   title   = {Data-driven universality distance for finite-size surface growth dynamics},
   year    = {2025},
-  note    = {Preprint}
+  note    = {Working paper}
 }
 ```
 

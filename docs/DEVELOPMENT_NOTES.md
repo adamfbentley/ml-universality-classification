@@ -1,6 +1,6 @@
 # Development Notes
 
-**Project Status:** ✅ Publication Ready - Papers polished and submitted to GitHub
+**Project Status:** Active research project
 
 This document tracks the complete development history of the ML Universality Classification project, from initial supervised learning to the final universality distance metric with rigorous bootstrap uncertainty quantification.
 
@@ -361,7 +361,7 @@ src/
 
 #### 1. Physics Paper (PRE Target)
 **File:** `arxiv/physics_paper/main.tex`  
-**Status:** Publication ready (426 lines, revtex4-2 format)  
+**Status:** Draft complete (426 lines, revtex4-2 format)  
 **Title:** Data-Driven Universality Distance for Finite-Size Surface Growth Dynamics
 
 **Key Results:**
@@ -435,6 +435,6 @@ src/
 If citing this work:
 ```
 Bentley, A. (2026). Data-driven universality distance for finite-size 
-surface growth dynamics. Physical Review E (submitted).
+surface growth dynamics.
 ```
 

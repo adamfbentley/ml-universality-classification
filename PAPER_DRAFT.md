@@ -51,7 +51,7 @@ This approach does not replace renormalization group theory or scaling analysis.
 
 ### 2.1 Surface Growth Models
 
-We consider 1+1 dimensional surface growth described by stochastic partial differential equations of the form:
+I consider 1+1 dimensional surface growth described by stochastic partial differential equations of the form:
 
 ∂h/∂t = F[h] + η(x,t)
 

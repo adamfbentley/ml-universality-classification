@@ -12,13 +12,13 @@ This document tracks the complete development history of the ML Universality Cla
 
 | Phase | Focus | Status | Date |
 |-------|-------|--------|------|
-| Phase 1 | Supervised classification (EW vs KPZ) | Archived | Early 2025 |
-| Phase 2 | Anomaly detection framework | Complete | Mid 2025 |
-| Phase 3 | Crossover studies (multiple attempts) | Final version complete | Nov 2025 |
-| Phase 4 | Universality distance D_ML(κ) | ✅ Complete | Dec 2025 |
-| Phase 5 | Bootstrap uncertainty quantification | ✅ Complete | Jan 2026 |
-| Phase 6 | Ballistic deposition validation | ✅ Complete | Jan 2026 |
-| Phase 7 | Paper polish & submission prep | ✅ Complete | Jan 15, 2026 |
+| Phase 1 | Supervised classification (EW vs KPZ) | Archived | Mid 2025 |
+| Phase 2 | Anomaly detection framework | Complete | Jul-Aug 2025 |
+| Phase 3 | Crossover studies (multiple attempts) | Final version complete | Sep-Oct 2025 |
+| Phase 4 | Universality distance D_ML(κ) | ✅ Complete | Nov 2025 |
+| Phase 5 | Bootstrap uncertainty quantification | ✅ Complete | Dec 2025 |
+| Phase 6 | Ballistic deposition validation | ✅ Complete | Dec 2025 |
+| Phase 7 | Paper polish & submission prep | ✅ Complete | Jan 2026 |
 
 ---
 
@@ -41,7 +41,7 @@ Started with supervised RandomForest to classify Edwards-Wilkinson vs Kardar-Par
 - **Feature importance:** Gradient (24%) and temporal (49%) features dominated
 - **Scaling exponents (α, β):** Contributed <1% to classification accuracy
 
-### Why We Moved On
+### Why I Moved On
 - Supervised classification requires knowing all classes in advance
 - Acts as "lookup table" rather than discovery tool
 - Reviewer would ask: "So what?"—this just confirms known physics
@@ -53,7 +53,7 @@ Started with supervised RandomForest to classify Edwards-Wilkinson vs Kardar-Par
 ## Phase 2: Anomaly Detection Framework (Complete)
 
 ### Motivation
-Can we detect when a surface comes from an *unknown* universality class without needing to identify which one?
+Can I detect when a surface comes from an *unknown* universality class without needing to identify which one?
 
 ### Implementation
 - **Training:** Isolation Forest on EW + KPZ surfaces only
@@ -300,7 +300,7 @@ Complete manuscript with:
 - Supplementary information
 
 **One-sentence summary:**
-> We define a data-driven universality distance that quantifies proximity to the KPZ universality class directly from finite-size surface data, enabling quantitative identification of crossover scales without requiring reliable exponent fits.
+> A data-driven universality distance that quantifies proximity to the KPZ universality class directly from finite-size surface data, enabling quantitative identification of crossover scales without requiring reliable exponent fits.
 
 ---
 
@@ -327,7 +327,7 @@ ML models can learn numerical artifacts rather than physics. Always use consiste
 - Multiple redundant features provide robustness
 
 ### 3. Scale-Invariance Validates Physics Understanding
-Detection working across L=128→512 confirms we're capturing universality structure, not finite-size artifacts.
+Detection working across L=128→512 confirms the method captures universality structure, not finite-size artifacts.
 
 ### 4. Crossovers Reveal More Than Binary Classification
 Continuous D_ML metric provides richer information than "anomalous/not anomalous."

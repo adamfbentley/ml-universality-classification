@@ -6,7 +6,7 @@
 
 ## ABSTRACT (Draft)
 
-We demonstrate that unsupervised anomaly detection provides a **quantitative, continuous metric of universality class proximity** — directly from finite-size simulation data without fitting scaling exponents. An Isolation Forest trained on Edwards-Wilkinson and Kardar-Parisi-Zhang surfaces identifies distinct growth dynamics (MBE, conserved KPZ, quenched-disorder KPZ) as anomalous with 100% detection at system sizes L=128-512. The key result is operational: by normalizing anomaly scores across a parameter sweep interpolating between universality classes (KPZ→MBE via biharmonic coefficient κ), we extract a **universality distance D_ML(κ)** with crossover scale κ_c = 0.76 ± 0.05 and sharpness γ = 1.51 ± 0.16 (R² = 0.96). This provides a data-driven alternative to traditional power-law exponent fitting for characterizing universality class membership and crossover behavior. Feature ablation reveals that gradient and temporal statistics achieve 100% detection alone, while traditional scaling exponents (α, β) achieve only 79% — suggesting that local derivative statistics encode universality more robustly than global exponent estimation at finite size.
+I demonstrate that unsupervised anomaly detection provides a **quantitative, continuous metric of universality class proximity** — directly from finite-size simulation data without fitting scaling exponents. An Isolation Forest trained on Edwards-Wilkinson and Kardar-Parisi-Zhang surfaces identifies distinct growth dynamics (MBE, conserved KPZ, quenched-disorder KPZ) as anomalous with 100% detection at system sizes L=128-512. The key result is operational: by normalizing anomaly scores across a parameter sweep interpolating between universality classes (KPZ→MBE via biharmonic coefficient κ), I extract a **universality distance D_ML(κ)** with crossover scale κ_c = 0.76 ± 0.05 and sharpness γ = 1.51 ± 0.16 (R² = 0.96). This provides a data-driven alternative to traditional power-law exponent fitting for characterizing universality class membership and crossover behavior. Feature ablation reveals that gradient and temporal statistics achieve 100% detection alone, while traditional scaling exponents (α, β) achieve only 79% — suggesting that local derivative statistics encode universality more robustly than global exponent estimation at finite size.
 
 **Key Claims:**
 1. ML anomaly detection provides a continuous universality distance metric D_ML(κ)
@@ -23,7 +23,7 @@ We demonstrate that unsupervised anomaly detection provides a **quantitative, co
 **The problem with supervised classification:**
 - Requires knowing all classes in advance
 - Cannot detect new/unexpected universality classes
-- Limited to distinguishing classes we've explicitly trained on
+- Limited to distinguishing classes explicitly trained on
 - In real experiments: may encounter crossover regimes, novel dynamics, or unknown universality classes
 
 **What's needed:**
@@ -52,7 +52,7 @@ We demonstrate that unsupervised anomaly detection provides a **quantitative, co
 
 ### 1.3 Our Contribution
 
-We demonstrate that:
+I demonstrate that:
 1. Isolation Forest trained on EW+KPZ surfaces detects MBE, VLDS, and quenched-KPZ as anomalous with 100% accuracy
 2. This detection is **scale-invariant**: train at L=128 → works at L=256, L=512
 3. False positive rate is controlled (~5%) and improves at larger system sizes
@@ -305,7 +305,7 @@ Not essential for core claims but would strengthen the "manifold" interpretation
 
 ### 3.6 Universality Distance D_ML(κ) [MAIN NOVEL RESULT ★]
 
-**This is the key conceptual contribution:** We operationalize the anomaly score as a quantitative, continuous distance metric from a known universality class.
+**This is the key conceptual contribution:** I operationalize the anomaly score as a quantitative, continuous distance metric from a known universality class.
 
 **Setup:**
 - Fine κ sweep: 24 points from κ=0 (pure KPZ) to κ=10 (MBE-dominated)
@@ -406,7 +406,7 @@ The ML distance metric provides:
 
 **Evidence from failed experiments:**
 
-We initially attempted parameter sweeps using different simulation implementations:
+I initially attempted parameter sweeps using different simulation implementations:
 1. Training: `GrowthModelSimulator` (Numba-JIT, specific discretization)
 2. Testing: `AdditionalSurfaceGenerator` (NumPy, different timestep/stencil)
 
@@ -427,7 +427,7 @@ Both are valid KPZ implementations, but differ in:
 Isolation Forest learns the *feature distribution* of training data. Subtle numerical differences (not physics) can shift features enough to trigger anomaly detection. The detector is correctly identifying "out-of-distribution"—but the distribution is defined by the numerical scheme, not the universality class.
 
 **Resolution:**
-We created `extended_physics.py` using the exact same numerical infrastructure as training (same dt, same stencils, same centering). With this:
+I created `extended_physics.py` using the exact same numerical infrastructure as training (same dt, same stencils, same centering). With this:
 - κ=0 matches KPZ baseline ✓
 - κ>0 shows graded deviation (reflecting physics, not artifacts)
 
@@ -573,7 +573,7 @@ This artifact issue may actually be *less* problematic for real experimental dat
 - Validation that detector captures physics (time-dependent convergence), not artifacts
 
 **Defensible claim (referee-ready):**
-> "We demonstrate that an unsupervised anomaly detector trained on simulated EW and KPZ surfaces at one system size reliably identifies surfaces from distinct growth dynamics as out-of-distribution across multiple system sizes with 100% detection and ~5% false positive rate. The detector exhibits physics-aware behavior: known-class samples converge toward the learned manifold over time while unknown classes remain separated, providing evidence that universality classes form compact, scale-invariant manifolds in a physically interpretable feature space."
+> "I demonstrate that an unsupervised anomaly detector trained on simulated EW and KPZ surfaces at one system size reliably identifies surfaces from distinct growth dynamics as out-of-distribution across multiple system sizes with 100% detection and ~5% false positive rate. The detector exhibits physics-aware behavior: known-class samples converge toward the learned manifold over time while unknown classes remain separated, providing evidence that universality classes form compact, scale-invariant manifolds in a physically interpretable feature space."
 
 ---
 

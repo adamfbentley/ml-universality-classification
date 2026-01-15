@@ -9,8 +9,8 @@
 - Seminal paper: Neural networks classify phases directly from Monte Carlo configurations
 - Demonstrated classification of Ising ferromagnet/paramagnet, Coulomb phases, topological phases
 - **Key insight:** ML works "without knowledge of the Hamiltonian or locality of interactions"
-- **Relevance:** Sets the paradigm we're following—supervised classification of physical phases
-- **Gap our work addresses:** They focus on equilibrium phases; we address non-equilibrium growth
+- **Relevance:** Sets the paradigm I follow—supervised classification of physical phases
+- **Gap this work addresses:** They focus on equilibrium phases; this work addresses non-equilibrium growth
 
 #### 2. KPZ Universality: Experimental Verification
 **Takeuchi & Sano, PRL (2010)** [arXiv:1001.5121]
@@ -75,7 +75,7 @@
 
 ### Gap Analysis: Where Our Work Fits
 
-| Existing Work | What They Do | What We Add |
+| Existing Work | What They Do | What This Work Adds |
 |--------------|--------------|-------------|
 | Carrasquilla & Melko (2017) | Classify equilibrium phases | Non-equilibrium surface growth |
 | Takeuchi & Sano (2010-2012) | Verify KPZ experimentally via exponents | ML-based classification without asymptotic regime |

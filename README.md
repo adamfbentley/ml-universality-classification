@@ -16,7 +16,7 @@ An unsupervised anomaly detection approach that provides a continuous, quantitat
 
 ## Key Result
 
-We define a **universality distance D_ML(κ)** that quantifies proximity to the KPZ universality class:
+This project defines a **universality distance D_ML(κ)** that quantifies proximity to the KPZ universality class:
 
 | Parameter | Value | 95% CI |
 |-----------|-------|--------|
@@ -110,7 +110,7 @@ Gradient and temporal statistics encode universality more robustly than scaling 
 See [PAPER_DRAFT.md](PAPER_DRAFT.md) for the full writeup.
 
 **One-sentence summary:**
-> We define a data-driven universality distance that quantifies proximity to the KPZ universality class directly from finite-size surface data, enabling quantitative identification of crossover scales without requiring reliable exponent fits.
+> A data-driven universality distance that quantifies proximity to the KPZ universality class directly from finite-size surface data, enabling quantitative identification of crossover scales without requiring reliable exponent fits.
 
 ## Repository Structure
 

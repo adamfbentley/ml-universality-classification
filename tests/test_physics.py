@@ -41,8 +41,8 @@ def test_ballistic_deposition():
     assert trajectory.shape == (100, 64), f"Wrong shape: {trajectory.shape}"
     assert not np.isnan(trajectory).any(), "Contains NaN"
     
-    # BD heights should only increase
-    assert trajectory[-1].mean() >= trajectory[0].mean(), "BD should grow upward"
+    # The simulator centers each interface, so check roughening rather than mean height.
+    assert trajectory[-1].std() >= trajectory[0].std(), "BD should roughen over time"
 
 
 def test_different_seeds_differ():

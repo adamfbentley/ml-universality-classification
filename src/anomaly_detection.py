@@ -471,7 +471,7 @@ def run_cross_scale_robustness_study(
         print("  ✓ ROBUST: Detection persists across system sizes!")
         print("  → Strong evidence that universality classes form scale-invariant")
         print("    manifolds in feature space.")
-        print("  → This claim will survive peer review.")
+        print("  → Next step: test against same-class numerical variants.")
     else:
         print("  ✗ NOT ROBUST: Detection fails at different scales")
         print("  → Features may be scale-dependent, not universality-dependent")

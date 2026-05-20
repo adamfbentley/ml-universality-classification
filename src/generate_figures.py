@@ -1,13 +1,13 @@
 """
-Publication-Ready Figure Generation
+Research Figure Generation
 
-Creates polished, consistent figures for the paper:
+Creates consistent figures for exploratory reporting:
 1. Figure 1: Method schematic (conceptual)
 2. Figure 2: Universality distance D_ML(κ) - MAIN RESULT
 3. Figure 3: Exponent comparison (α, β vs D_ML)
 4. Figure 4: Supporting evidence (scale robustness, feature ablation)
 
-Style: Clean, professional, Nature-style color palette
+Style: Clean scientific plotting with a consistent color palette
 """
 
 from pathlib import Path
@@ -290,7 +290,7 @@ def create_figure_4_supporting(output_dir: Path):
     ax1.set_ylim(-0.15, 0.15)
     
     # Detection rate annotation
-    ax1.annotate('100% detection\nat all scales', xy=(2.5, -0.12), fontsize=8,
+    ax1.annotate('High detection\nin current runs', xy=(2.5, -0.12), fontsize=8,
                  ha='center', color=COLORS['secondary'], fontweight='bold')
     
     # ---- Panel B: Feature ablation ----
@@ -393,7 +393,7 @@ def create_figure_1_schematic(output_dir: Path):
 # ============================================================================
 
 def generate_all_figures():
-    """Generate all publication-ready figures."""
+    """Generate report figures."""
     output_dir = Path("results")
     
     print("=" * 60)

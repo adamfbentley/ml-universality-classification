@@ -772,5 +772,5 @@ if __name__ == "__main__":
     # Generate plots
     analyzer.plot_results()
     
-    # Print paper-ready format
+    # Print report-friendly format
     print("\n" + format_for_paper(results))

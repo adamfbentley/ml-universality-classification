@@ -19,7 +19,7 @@ from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
 
 
-def test_ballistic_deposition(n_train=50, n_test=50, system_size=128, time_steps=200):
+def run_ballistic_deposition_validation(n_train=50, n_test=50, system_size=128, time_steps=200):
     """
     Test ballistic deposition detection.
     
@@ -194,7 +194,7 @@ if __name__ == '__main__':
     parser.add_argument('--time-steps', type=int, default=200, help='Time steps T')
     args = parser.parse_args()
     
-    test_ballistic_deposition(
+    run_ballistic_deposition_validation(
         n_train=args.n_train,
         n_test=args.n_test,
         system_size=args.system_size,

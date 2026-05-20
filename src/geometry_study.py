@@ -285,7 +285,7 @@ def plot_pca_visualization(results: Dict, out_path: Path):
 
 
 def plot_summary_figure(results: Dict, out_path: Path):
-    """Create a single publication-ready summary figure."""
+    """Create a single report-ready summary figure."""
     fig = plt.figure(figsize=(12, 8))
     
     # Layout: 2x2 grid
